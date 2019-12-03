@@ -1,0 +1,16 @@
+server:
+  port: 8380
+spring:
+  application:
+    name: naliwan-service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://106.14.120.172:3306/aimp?useUnicode=true&characterEncoding=utf8
+    username: aimp
+    password: Aimp@123
+logging:
+  level:
+    com:
+      wofang:
+        mybatisplus:
+          mapper: debug
