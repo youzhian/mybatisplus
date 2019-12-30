@@ -1,6 +1,8 @@
 package com.wofang.mybatisplus.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wofang.mybatisplus.model.UserInfo;
 import com.wofang.mybatisplus.service.UserInfoService;
 import com.wofang.mybatisplus.util.ResponseUtil;
@@ -32,7 +34,11 @@ public class IndexController {
         QueryWrapper<UserInfo> query = new QueryWrapper<>();
         query.lambda().eq(UserInfo::getUserName,"admin").orderByAsc(UserInfo::getUserId);
 
+
         List<UserInfo> list = userInfoService.list(query);
+        IPage<UserInfo> page = new Page<>();
+
+        userInfoService.page(page,query);
 
         return ResponseUtil.success(list);
     }
