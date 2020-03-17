@@ -5,7 +5,7 @@ spring:
     name: naliwan-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://106.14.120.172:3306/aimp?useUnicode=true&characterEncoding=utf8
+    url: jdbc:mysql://106.14.120.172:3306/korder?useUnicode=true&characterEncoding=utf8
     username: aimp
     password: Aimp@123
   redis:

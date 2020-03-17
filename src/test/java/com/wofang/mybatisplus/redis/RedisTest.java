@@ -22,7 +22,7 @@ public class RedisTest {
 
     @Test
     public void contextLoads(){
-        redisTemplate.opsForValue().set("test2",2);
+        redisTemplate.opsForValue().set("test2",3);
         int test = (int)redisTemplate.opsForValue().get("test2");
         System.out.println(test);
     }
