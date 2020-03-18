@@ -9,6 +9,7 @@ import com.wofang.mybatisplus.util.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 
@@ -19,17 +20,19 @@ public class IndexController {
     private UserInfoService userInfoService;
 
     @RequestMapping("/")
-    public Object index(){
-        return ResponseUtil.success();
+    public ModelAndView index(){
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("index");
+        return mv;
     }
 
-    @RequestMapping("/queryUserInfo")
+    //@RequestMapping("/queryUserInfo")
     public Object queryUserInfo(){
         List<UserInfo> list = userInfoService.queryUserInfo();
         return ResponseUtil.success(list);
     }
 
-    @RequestMapping("queryUserInfoByName")
+    //@RequestMapping("queryUserInfoByName")
     public Object queryUserInfoByName(String userName){
         QueryWrapper<UserInfo> query = new QueryWrapper<>();
         query.lambda().eq(UserInfo::getUserName,"admin").orderByAsc(UserInfo::getUserId);

@@ -1,5 +1,7 @@
 server:
   port: 8380
+  servlet:
+    context-path: /ko
 spring:
   application:
     name: naliwan-service
@@ -25,6 +27,10 @@ spring:
         min-idle: 0
     #超时时间
     timeout: 1000
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
 logging:
   level:
     com:
