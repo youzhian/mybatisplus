@@ -1,7 +1,7 @@
 server:
   port: 8380
   servlet:
-    context-path: /ko
+    context-path: /kingorder
 spring:
   application:
     name: naliwan-service

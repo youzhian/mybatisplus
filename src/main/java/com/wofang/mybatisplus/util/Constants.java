@@ -71,6 +71,12 @@ public final class Constants {
      * 发展人名称
      */
     public static final String PRODUCT_DEVELOPER_NAME = "市含浦吉先沃店（线上）";
+    /**
+     * 联通接口成功标识
+     */
+    public static final String KING_ORDER_SUCCESS_CODE = "0000";
 
+    public static final String KING_ORDER_RESP_CODE_KEY = "respCode";
 
+    public static final String KING_ORDER_RET_CDOE_KEY = "retCode";
 }

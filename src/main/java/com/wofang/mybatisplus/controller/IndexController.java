@@ -19,6 +19,11 @@ public class IndexController {
     @Autowired
     private UserInfoService userInfoService;
 
+    @RequestMapping("")
+    public ModelAndView none(){
+        return index();
+    }
+
     @RequestMapping("/")
     public ModelAndView index(){
         ModelAndView mv = new ModelAndView();

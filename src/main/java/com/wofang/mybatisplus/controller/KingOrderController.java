@@ -61,6 +61,7 @@ public class KingOrderController {
         log.info("==============url["+url+"]=================");
         String result = HttpClientUtil.doGet(url.toString());
         log.info(result);
+
         return result;
     }
     /**
@@ -112,10 +113,25 @@ public class KingOrderController {
                 log.info("==============url["+url+"]=================");
                 String result = HttpClientUtil.doGet(url.toString());
                 log.info(result);
-                return result;
+                if(StringUtils.isNotBlank(result)){
+                    JSONObject resultJson = JSONObject.parseObject(result);
+                    //成功
+                    if(Constants.KING_ORDER_SUCCESS_CODE
+                            .equals(resultJson.getString(Constants.KING_ORDER_RESP_CODE_KEY))){
+                        return ResponseUtil.success("资格校验通过");
+                    }else{
+                        String message = "身份信息错误";
+                        /*String respDesc = resultJson.getString("respDesc");
+                        if(StringUtils.isNotBlank(respDesc)){
+
+                        }*/
+                        return ResponseUtil.error(message);
+                    }
+                }
+                return ResponseUtil.error("系统繁忙，请重试");
             } catch (Exception e) {
                 log.error(e.getMessage(),e);
-                ResponseUtil.error("系统繁忙，请重试");
+                return ResponseUtil.error("系统繁忙，请重试");
             }
         }
 

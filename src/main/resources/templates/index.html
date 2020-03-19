@@ -197,10 +197,14 @@
 <script type="text/javascript" th:src="@{/static/js/city-picker.js}"></script>
 <script type="text/javascript" th:inline="javascript">
     /*<![CDATA[*/
+    var province = "";
+    var cityCode = "";
+    var countyCode = "";
     $(function () {
-        let province = "";
-        let cityCode = "";
-        let countyCode = "";
+        //是否正在提交标识
+        let submitFlg = false;
+
+
         $("#start").cityPicker({
             title: "选择所在地",
             onChange: function (picker, values, displayValues) {
@@ -212,6 +216,10 @@
         });
         $("#submitBtn").on("click",function () {
             console.log("submitBtn被触发")
+            //若正在提交，则不进行提交操作
+            if(submitFlg){
+                return;
+            }
             //表单验证通过
             if(checkFormDate()){
 
@@ -236,6 +244,8 @@
                     dataType: 'json',
                     beforeSend:function(e){
                         console.log("to du beforeSend");
+                        //设置为true,表示正在提交
+                        submitFlg = true;
                         //增加遮罩
                         $.showLoading("正在提交");
                     },
@@ -245,6 +255,8 @@
                     },
                     complete:function (e) {
                         console.log("to du complete")
+                        //表示已经提交完成
+                        submitFlg = false;
                         $.hideLoading();
                     }
                 });
@@ -259,6 +271,40 @@
         let certName = $("#certName").val();
         let custPhone = $("#custPhone").val();
         let certId = $("#certId").val();
+
+        if(certName == null || certName == ""){
+            $.toast("请填写您的姓名信息","text");
+            $("#certName").focus();
+            return false;
+        }
+
+        if(custPhone == null || custPhone == ""){
+            $.toast("请填写您的联系电话","text");
+            $("#custPhone").focus();
+            return false;
+        }
+
+        if(certId == null || certId == ""){
+            $.toast("请填写您的身份证号","text");
+            $("#certId").focus();
+            return false;
+        }
+        if(province == null || province == ""){
+            $.toast("请选择您的所在区域","text");
+            $("#certId").focus();
+            return false;
+        }
+
+        if(cityCode == null || cityCode == ""){
+            $.toast("请选择您的所在区域","text");
+            $("#certId").focus();
+            return false;
+        }
+        if(countyCode == null || countyCode == ""){
+            $.toast("请选择您的所在区域","text");
+            $("#certId").focus();
+            return false;
+        }
 
         return true;
     }

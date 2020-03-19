@@ -19,7 +19,7 @@ public class ProvinceCityCountyController extends BaseController {
     @Autowired
     private ProvinceCityCountyService provinceCityCountyService;
 
-    @RequestMapping("initProvinceData")
+    //@RequestMapping("initProvinceData")
     public Object initProvinceData(){
         String filePath = "E:\\provinceData.json";
         File dataFile = new File(filePath);

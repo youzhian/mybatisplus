@@ -22,19 +22,19 @@ public class ResponseUtil {
      */
     private static final String DEFAULT_ERROR_MSG = "失败";
 
-    public static Object success(){
+    public static JSONObject success(){
         return success(null);
     }
 
-    public static Object success(String message){
+    public static JSONObject success(String message){
         return success(message,null);
     }
 
-    public static Object success(Object data){
+    public static JSONObject success(Object data){
         return success(null,data);
     }
 
-    public static Object success(String message,Object data){
+    public static JSONObject success(String message,Object data){
         JSONObject result = new JSONObject();
         result.put("code",SUCCESS_CODE);
         result.put("message", StringUtils.isEmpty(message)?DEFAULT_SUCCESS_MSG:message);
@@ -43,11 +43,11 @@ public class ResponseUtil {
         return result;
     }
 
-    public static Object error(String message){
+    public static JSONObject error(String message){
         return error(null,message);
     }
 
-    public static Object error(Integer code,String message){
+    public static JSONObject error(Integer code,String message){
         return error(code,message,null);
     }
 
@@ -56,11 +56,11 @@ public class ResponseUtil {
      * @param data
      * @return
      */
-    public static Object error(Object data){
+    public static JSONObject error(Object data){
         return error(null,null,data);
     }
 
-    public static Object error(Integer code,String message,Object data){
+    public static JSONObject error(Integer code,String message,Object data){
         JSONObject result = new JSONObject();
         result.put("code",code == null?DEFAULT_ERROR_CODE:code);
         result.put("message", StringUtils.isEmpty(message)?DEFAULT_ERROR_MSG:message);
