@@ -12,7 +12,7 @@ public class Korder {
     /**
      * 时间戳
      */
-    private String timestamp;
+    private long timestamp;
     /**
      * 用户ID
      */
@@ -21,6 +21,10 @@ public class Korder {
      * 交易流水号
      */
     private String busiSerial;
+    /**
+     * 签名
+     */
+    private String sign;
 
     public KOrderMsg getMsg() {
         return msg;
@@ -30,11 +34,11 @@ public class Korder {
         this.msg = msg;
     }
 
-    public String getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -52,5 +56,13 @@ public class Korder {
 
     public void setBusiSerial(String busiSerial) {
         this.busiSerial = busiSerial;
+    }
+
+    public String getSign() {
+        return sign;
+    }
+
+    public void setSign(String sign) {
+        this.sign = sign;
     }
 }

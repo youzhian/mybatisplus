@@ -4,7 +4,7 @@ public class RequestObj {
 
     private Object msg;
 
-    private String timestamp;
+    private long timestamp;
 
     private String sign;
 
@@ -20,11 +20,11 @@ public class RequestObj {
         this.msg = msg;
     }
 
-    public String getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 

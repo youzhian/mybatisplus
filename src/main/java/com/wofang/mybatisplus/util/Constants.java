@@ -17,11 +17,11 @@ public final class Constants {
     /**
      * 用户ID
      */
-    public static final String uid = "jaring";
+    public static final String uid = "gdzx";
     /**
      * MD5加密时所需的key
      */
-    public static final String KEY = "6eder344342323";
+    public static final String KEY = "gdzx18853289xzdg";
     /**
      * key在请求参数中的参数名
      */

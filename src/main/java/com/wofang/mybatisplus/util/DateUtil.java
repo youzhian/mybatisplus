@@ -571,4 +571,13 @@ public final class DateUtil {
 		return nowDate.compareTo(begin) >= 0 && nowDate.compareTo(end) <= 0;
 	}
 
+	/**
+	 * 获取当前系统时间的秒数
+	 * @return
+	 */
+	public static long getcurrentTimeSec(){
+		long timeMillis = System.currentTimeMillis();
+		//直接除以1000取整
+		return timeMillis/1000;
+	}
 }

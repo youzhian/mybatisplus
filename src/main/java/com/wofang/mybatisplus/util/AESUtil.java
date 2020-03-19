@@ -28,15 +28,17 @@ public final class AESUtil {
 	 */
 	public static final String encrypt(String content, String password) throws Exception {
 		String encryptType = "AES";
-		KeyGenerator kgen = KeyGenerator.getInstance("AES");
+		String algorithm = "AES/ECB/PKCS5Padding";
+		KeyGenerator kgen = KeyGenerator.getInstance(encryptType);
 		// kgen.init(128, new SecureRandom(password.getBytes()));
 		SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
 		secureRandom.setSeed(password.getBytes());
 		kgen.init(128, secureRandom);
 		SecretKey secretKey = kgen.generateKey();
 		byte[] enCodeFormat = secretKey.getEncoded();
-		SecretKeySpec key = new SecretKeySpec(enCodeFormat, "AES");
-		Cipher cipher = Cipher.getInstance("AES");// 创建密码器
+		SecretKeySpec key = new SecretKeySpec(enCodeFormat, encryptType);
+		// 创建密码器
+		Cipher cipher = Cipher.getInstance(algorithm);
 		byte[] byteContent = content.getBytes("utf-8");
 		// 初始化
 		cipher.init(Cipher.ENCRYPT_MODE, key);

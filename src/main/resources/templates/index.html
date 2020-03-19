@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="initial-scale=1.0, maximum-scale=1, minimum-scale=1, user-scalable=no,uc-fitscreen=yes">
-    <title>Document</title>
+    <title>腾讯大王卡</title>
     <style>
         * {
             margin: 0;
@@ -98,7 +98,7 @@
         
         input {
             font-size: 14px;
-            color: #b7bbbe;
+            color: #151617;
         }
         
         img {
@@ -137,44 +137,42 @@
             color: red;
         }
     </style>
-    <script type="text/javascript" th:src="@{/static/js//jquery.min.js}"></script>
-    <script type="text/javascript" th:src="@{/static/js//layer.js}"></script>
-    <script type="text/javascript" th:src="@{/static/js//index.js}"></script>
+    <link rel="stylesheet" th:href="@{/static/css/weui.min.css}">
+    <link rel="stylesheet" th:href="@{/static/css/jquery-weui.css}">
+    <script type="text/javascript" th:src="@{/static/js/jquery-2.1.4.js}"></script>
 </head>
 
 <body>
     <div class="content">
-        <div style="font-size:0"><img th:src="@{/static/images//01.jpg}" alt=""></div>
-        <div style="font-size:0"><img th:src="@{/static/images//02.jpg}" alt=""></div>
+        <div style="font-size:0"><img th:src="@{/static/images/01.jpg}" alt=""></div>
+        <div style="font-size:0"><img th:src="@{/static/images/02.jpg}" alt=""></div>
         <form action="" id="dataForm" method="post" >
         <!-- 表单模块 start -->
         <section>
             <div class="form_part">
                 <div class="title">根据国家实名制要求,请准确提供有效证件信息</div>
                 <div class="infor">
-                    <div><span>姓名</span><input name="certName" type="text" placeholder="请输入有效证件姓名"></div>
-                    <div><span>联系电话</span><input name="custPhone" type="text" placeholder="请输入联系电话"></div>
-                    <div><span>身份证</span><input name="certId" type="text" placeholder="请输入身份证"></div>
+                    <div><span>姓名</span><input id="certName" name="certName" type="text" placeholder="请输入有效证件姓名"></div>
+                    <div><span>联系电话</span><input id="custPhone" name="custPhone" type="text" placeholder="请输入联系电话"></div>
+                    <div><span>身份证</span><input id="certId" name="certId" type="text" placeholder="请输入身份证"></div>
                 </div>
                 <div class="title">请填写配送地址</div>
                 <div class="infor">
                     <div><span>所在地区</span>
-                        <div style="display: inline-block;">点击选取省市区</div>
-                        <input name="province" id="province"/>
-                        <input name="cityCode" id="cityCode"/>
-                        <input name="countyCode" id="countyCode"/>
+                        <div style="display: inline-block;" id="sel_city"><input id="start" placeholder="点击选取省市区" value=""/></div>
                     </div>
-                    <div><input style="width: 100%;" name="userAddr" type="text" placeholder="街道/镇+村/小区/写字楼+门牌号"></div>
+                    <div><input style="width: 100%;" id="userAddr" name="userAddr" type="text" placeholder="街道/镇+村/小区/写字楼+门牌号"></div>
                 </div>
                 <div class="last">
-                    <div style="padding-top: 10px;">
+                    <!--<div style="padding-top: 10px;">
                         <input id="confirm" name="confirm" type="radio" value="" />
                         <span>我已阅读并同意 </span>
                         <a href="#"> 《客户入网服务协议及业务协议》</a>
                     </div>
                     <div style="margin-left: 30%;margin-top: 7px;">
                         <a href="#">《业务办理公告》</a>
-                    </div>
+                    </div>-->
+                    <div style="padding-top: 10px;"></div>
                     <div class="button" id="submitBtn">
                         立即提交 免费送货上门
                     </div>
@@ -194,18 +192,76 @@
     </div>
 
 </body>
+<script type="text/javascript" th:src="@{/static/js/jquery-weui.min.js}"></script>
+<script type="text/javascript" th:src="@{/static/js/city-data.js}"></script>
+<script type="text/javascript" th:src="@{/static/js/city-picker.js}"></script>
 <script type="text/javascript" th:inline="javascript">
     /*<![CDATA[*/
     $(function () {
+        let province = "";
+        let cityCode = "";
+        let countyCode = "";
+        $("#start").cityPicker({
+            title: "选择所在地",
+            onChange: function (picker, values, displayValues) {
+                console.log(values, displayValues);
+                province = values[0];
+                cityCode = values[1];
+                countyCode = values[2];
+            }
+        });
         $("#submitBtn").on("click",function () {
             console.log("submitBtn被触发")
-            let confirm = $("#confirm");
-            if(!confirm.prop("checked")){
-                layer.alert("请选择“我已阅读并同意”")
+            //表单验证通过
+            if(checkFormDate()){
+
+                let url = /*[[@{/kingOrder/orderSubmit}]]*/;
+
+                let certName = $("#certName").val();
+
+                let custPhone = $("#custPhone").val();
+
+                let certId = $("#certId").val();
+                let userAddr = $("#userAddr").val();
+
+                let data = {"certName":certName,"custPhone":custPhone,"certId":certId,"userAddr":userAddr,
+                    "province":province,"cityCode":cityCode,"countyCode":countyCode};
+                $.showLoading();
+                $.ajax({
+                    type:"post",
+                    url:url,
+                    cache: false,
+                    async: false,
+                    data:data,
+                    dataType: 'json',
+                    beforeSend:function(e){
+                        console.log("to du beforeSend");
+                        //增加遮罩
+                        $.showLoading("正在提交");
+                    },
+                    success:function(data){
+                        var codeMstList = data.code;
+                        console.log(data);
+                    },
+                    complete:function (e) {
+                        console.log("to du complete")
+                        $.hideLoading();
+                    }
+                });
             }
 
         });
     })
+    /**
+     * 检查表单数据
+     **/
+    function checkFormDate(){
+        let certName = $("#certName").val();
+        let custPhone = $("#custPhone").val();
+        let certId = $("#certId").val();
+
+        return true;
+    }
     /*]]>*/
 </script>
 </html>
