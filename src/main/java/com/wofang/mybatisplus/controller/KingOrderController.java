@@ -191,7 +191,9 @@ public class KingOrderController {
                     || StringUtils.isBlank(orderVO.getCountyCode())){
                 return ResponseUtil.error("所在地不能为空");
             }
-
+            if(StringUtils.isBlank(orderVO.getUserAddr())){
+                return ResponseUtil.error("详细地址不能为空");
+            }
             //验证资格
             JSONObject verify = userVerify(orderVO.getCertId(),orderVO.getCertName());
             //验证不通过
@@ -209,7 +211,7 @@ public class KingOrderController {
             msg.setProvince(orderVO.getProvince());
             msg.setCityCode(orderVO.getCityCode());
             msg.setCountyCode(orderVO.getCountyCode());
-            msg.setUserAddr(StringUtils.isBlank(orderVO.getUserAddr())? null:orderVO.getUserAddr());
+            msg.setUserAddr(orderVO.getUserAddr());
             msg.setCustomInfo(customInfo);
             JSONObject mg = JSONObject.parseObject(JSONObject.toJSONString(msg));
 
@@ -235,7 +237,7 @@ public class KingOrderController {
             key = URLEncoder.encode(key, Constants.CHARACTER_ENCODING_UTF8);
 
             StringBuilder url = new StringBuilder();
-            url.append(Constants.URL_USER_VERIFY).append("?").append("uid=").append(Constants.uid);
+            url.append(Constants.URL_KING_ORDER_SUBMIT).append("?").append("uid=").append(Constants.uid);
             url.append("&key=").append(key).append("&bs64=0");
             log.info("==============url[" + url + "]=================");
             String result = HttpClientUtil.doGet(url.toString());

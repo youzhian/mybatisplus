@@ -12,6 +12,7 @@
     <artifactId>mybatisplus</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>mybatisplus</name>
+    <packaging>jar</packaging>
     <description>mybatisplus project for Spring Boot</description>
 
     <properties>
@@ -82,6 +83,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.wofang.mybatisplus.ServerApplication</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>

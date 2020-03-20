@@ -161,7 +161,7 @@
                     <div><span>所在地区</span>
                         <div style="display: inline-block;" id="sel_city"><input id="start" placeholder="点击选取省市区" value=""/></div>
                     </div>
-                    <div><input style="width: 100%;" id="userAddr" name="userAddr" type="text" placeholder="街道/镇+村/小区/写字楼+门牌号"></div>
+                    <div><span>详细地址</span><input style="width: 100%;" id="userAddr" name="userAddr" type="text" placeholder="街道/镇+村/小区/写字楼+门牌号"></div>
                 </div>
                 <div class="last">
                     <!--<div style="padding-top: 10px;">
@@ -205,11 +205,9 @@
         //是否正在提交标识
         let submitFlg = false;
 
-
         $("#start").cityPicker({
             title: "选择所在地",
             onChange: function (picker, values, displayValues) {
-                console.log(values, displayValues);
                 province = values[0];
                 cityCode = values[1];
                 countyCode = values[2];
@@ -235,27 +233,31 @@
 
                 let data = {"certName":certName,"custPhone":custPhone,"certId":certId,"userAddr":userAddr,
                     "province":province,"cityCode":cityCode,"countyCode":countyCode};
-                $.showLoading();
+
                 $.ajax({
                     type:"post",
                     url:url,
                     cache: false,
-                    async: false,
+                    async: true,
                     data:data,
                     dataType: 'json',
                     beforeSend:function(e){
                         console.log("to du beforeSend");
                         //设置为true,表示正在提交
                         submitFlg = true;
-                        //增加遮罩
-                        $.showLoading("正在提交");
+                        $.showLoading("正在提交...")
+                        //$("#submitBtn").css("background-color","#b1afac").html("正在提交...");
+
                     },
                     success:function(data){
                         console.log(data);
                         var code = data.code;
                         var message = data.message;
                         if(code == 200){
-                            $.toast("提交成功","text");
+                            $.alert("提交成功","提示",function () {
+                                //重载
+                                window.location.reload();
+                            });
                         }else{
                             $.toast(message,"text");
                         }
@@ -264,6 +266,7 @@
                         console.log("to du complete");
                         //表示已经提交完成
                         submitFlg = false;
+                        //$("#submitBtn").css("background-color","#daa95d").html("立即提交 免费送货上门");
                         $.hideLoading();
                     }
                 });
@@ -278,6 +281,7 @@
         let certName = $("#certName").val();
         let custPhone = $("#custPhone").val();
         let certId = $("#certId").val();
+        let userAddr = $("#userAddr").val();
 
         if(certName == null || certName == ""){
             $.toast("请填写您的姓名信息","text");
@@ -322,6 +326,11 @@
         if(countyCode == null || countyCode == ""){
             $.toast("请选择您的所在区域","text");
             $("#certId").focus();
+            return false;
+        }
+        if(userAddr == null || userAddr == ""){
+            $.toast("请填写详细地址","text");
+            $("#userAddr").focus();
             return false;
         }
 
