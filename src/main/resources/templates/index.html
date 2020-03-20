@@ -195,6 +195,7 @@
 <script type="text/javascript" th:src="@{/static/js/jquery-weui.min.js}"></script>
 <script type="text/javascript" th:src="@{/static/js/city-data.js}"></script>
 <script type="text/javascript" th:src="@{/static/js/city-picker.js}"></script>
+<script type="text/javascript" th:src="@{/static/js/index.js}"></script>
 <script type="text/javascript" th:inline="javascript">
     /*<![CDATA[*/
     var province = "";
@@ -250,11 +251,17 @@
                         $.showLoading("正在提交");
                     },
                     success:function(data){
-                        var codeMstList = data.code;
                         console.log(data);
+                        var code = data.code;
+                        var message = data.message;
+                        if(code == 200){
+                            $.toast("提交成功","text");
+                        }else{
+                            $.toast(message,"text");
+                        }
                     },
                     complete:function (e) {
-                        console.log("to du complete")
+                        console.log("to du complete");
                         //表示已经提交完成
                         submitFlg = false;
                         $.hideLoading();
@@ -276,16 +283,28 @@
             $.toast("请填写您的姓名信息","text");
             $("#certName").focus();
             return false;
+        }else if(!checkName(certName)){
+            $.toast("请填写正确的姓名信息","text");
+            $("#certName").focus();
+            return false;
         }
 
         if(custPhone == null || custPhone == ""){
             $.toast("请填写您的联系电话","text");
             $("#custPhone").focus();
             return false;
+        }else if(!checkPhone(custPhone)){
+            $.toast("联系电话格式不正确","text");
+            $("#custPhone").focus();
+            return false;
         }
 
         if(certId == null || certId == ""){
             $.toast("请填写您的身份证号","text");
+            $("#certId").focus();
+            return false;
+        }else if(!checkCard(certId)){
+            $.toast("身份证号格式不正确","text");
             $("#certId").focus();
             return false;
         }

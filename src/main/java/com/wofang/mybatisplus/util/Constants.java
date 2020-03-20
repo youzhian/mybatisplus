@@ -6,6 +6,23 @@ package com.wofang.mybatisplus.util;
  */
 public final class Constants {
     /**
+     * 请求类型-资格验证
+     */
+    public static final String REQUEST_TYPE_VERIFY = "1";
+    /**
+     * 请求类型-表单提交
+     */
+    public static final String REQUEST_TYPE_SUBMIT = "2";
+    /**
+     * 请求结果-成功
+     */
+    public static final String SUCCESS_FLG_SUCCESS = "1";
+    /**
+     * 请求结果-失败
+     */
+    public static final String SUCCESS_FLG_FAIL = "2";
+
+    /**
      * 流水号最大值
      */
     public static int MAX_NUM = 18;//999999999;

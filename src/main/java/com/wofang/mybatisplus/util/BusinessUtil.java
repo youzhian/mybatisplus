@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.sound.midi.Soundbank;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BusinessUtil {
@@ -13,6 +14,18 @@ public class BusinessUtil {
      * 计数器
      */
     public static AtomicInteger atomicInteger = new AtomicInteger(0);
+
+    /**
+     * 获取交易流水号
+     * @param uid 用户ID
+     * @param timestamp 时间戳
+     * @return
+     */
+    public static String getBusinessSerialNo(String uid,long timestamp){
+        StringBuffer buffer = new StringBuffer(uid);
+        buffer.append(timestamp).append(UUID.randomUUID().toString());
+        return buffer.toString();
+    }
 
     /**
      * 生成交易流水号

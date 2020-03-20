@@ -3,7 +3,9 @@ package com.wofang.mybatisplus.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.wofang.mybatisplus.model.*;
 import com.wofang.mybatisplus.service.ProvinceCityCountyService;
+import com.wofang.mybatisplus.service.RequestInfoService;
 import com.wofang.mybatisplus.util.*;
+import io.netty.handler.codec.json.JsonObjectDecoder;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,11 @@ public class KingOrderController {
      */
     @Autowired
     private ProvinceCityCountyService provinceCityCountyService;
+    /**
+     * 请求信息保存
+     */
+    @Autowired
+    private RequestInfoService requestInfoService;
 
     @RequestMapping("apiAddrss")
     public Object apiAddrss() throws Exception {
@@ -53,9 +60,9 @@ public class KingOrderController {
         param.put("timestamp",obj.getTimestamp());
         String sign = MD5Utils.createSign(Constants.CHARACTER_ENCODING_UTF8,p,Constants.KEY,Constants.KEY_NAME,true);
         obj.setSign(sign);
-
-        log.info(JSONObject.toJSONString(obj));
-        String key = AESUtil.encrypt(JSONObject.toJSONString(obj),Constants.KEY);
+        String requestData = JSONObject.toJSONString(obj);
+        log.info(requestData);
+        String key = AESUtil.encrypt(requestData,Constants.KEY);
         StringBuffer url = new StringBuffer();
         url.append("http://73110010.com/apiAddrss").append("?").append("uid=").append(Constants.uid).append("&key=").append(key).append("&bs64=0");
         log.info("==============url["+url+"]=================");
@@ -71,9 +78,11 @@ public class KingOrderController {
      * @return
      */
     @RequestMapping("userVerify")
-    public Object userVerify(String certNum,String custName){
+    public JSONObject userVerify(String certNum,String custName){
 
         if(StringUtils.isNotBlank(certNum) && StringUtils.isNotBlank(custName)){
+            //请求参数
+            RequestInfo requestInfo = new RequestInfo();
             try {
                 //请求信息主体
                 JSONObject request = new JSONObject();
@@ -85,7 +94,7 @@ public class KingOrderController {
                 //获取到秒的时间戳
                 long timestamp = DateUtil.getcurrentTimeSec();
                 //交易流水号
-                String busiSerial = Constants.uid+timestamp;
+                String busiSerial = BusinessUtil.getBusinessSerialNo(Constants.uid,timestamp);
 
                 RequestObj requestObj = new RequestObj();
 
@@ -101,30 +110,41 @@ public class KingOrderController {
                 String sign = MD5Utils.createSign2(Constants.CHARACTER_ENCODING_UTF8,param,Constants.KEY,Constants.KEY_NAME,true);
 
                 requestObj.setSign(sign);
-                log.info("========="+JSONObject.toJSONString(requestObj));
+                String requestData = JSONObject.toJSONString(requestObj);
+                log.info("========="+requestData);
                 /**
                  * 加密
                  */
-                String key = AESPlus.encrypt(JSONObject.toJSONString(requestObj),Constants.KEY);
+                String key = AESPlus.encrypt(requestData,Constants.KEY);
                 key = URLEncoder.encode(key,Constants.CHARACTER_ENCODING_UTF8);
                 StringBuffer url = new StringBuffer();
                 url.append(Constants.URL_USER_VERIFY).append("?").append("uid=").append(Constants.uid)
                         .append("&key=").append(key).append("&bs64=0");
-                log.info("==============url["+url+"]=================");
+                log.info("==============url["+url.toString()+"]=================");
                 String result = HttpClientUtil.doGet(url.toString());
                 log.info(result);
+                //组装请求信息
+                requestInfo.setBusiSerialNo(busiSerial);
+                requestInfo.setRequestData(requestData);
+                requestInfo.setRequestUrl(url.toString());
+                requestInfo.setResponseResult(result);
+                requestInfo.setRequestType(Constants.REQUEST_TYPE_VERIFY);
+                //默认是失败
+                requestInfo.setSuccessFlg(Constants.SUCCESS_FLG_FAIL);
+
                 if(StringUtils.isNotBlank(result)){
                     JSONObject resultJson = JSONObject.parseObject(result);
                     //成功
                     if(Constants.KING_ORDER_SUCCESS_CODE
                             .equals(resultJson.getString(Constants.KING_ORDER_RESP_CODE_KEY))){
+                        //请求成功
+                        requestInfo.setSuccessFlg(Constants.SUCCESS_FLG_SUCCESS);
                         return ResponseUtil.success("资格校验通过");
                     }else{
                         String message = "身份信息错误";
-                        /*String respDesc = resultJson.getString("respDesc");
-                        if(StringUtils.isNotBlank(respDesc)){
-
-                        }*/
+                        if("9999".equals(resultJson.getString(Constants.KING_ORDER_RESP_CODE_KEY))){
+                            message = "身份证号码不合法";
+                        }
                         return ResponseUtil.error(message);
                     }
                 }
@@ -132,6 +152,17 @@ public class KingOrderController {
             } catch (Exception e) {
                 log.error(e.getMessage(),e);
                 return ResponseUtil.error("系统繁忙，请重试");
+            }finally {
+                //保存请求信息
+                if(StringUtils.isNotBlank(requestInfo.getBusiSerialNo())){
+                    try {
+                        requestInfoService.save(requestInfo);
+                    }catch (Exception e){
+                        log.info("插入请求信息异常,请求对象:", JSONObject.toJSONString(requestInfo));
+                        log.info("请求对象:");
+                        log.error(e.getMessage(),e);
+                    }
+                }
             }
         }
 
@@ -144,7 +175,29 @@ public class KingOrderController {
      */
     @RequestMapping("orderSubmit")
     public Object orderSubmit(OrderVO orderVO){
+        //请求信息对象
+        RequestInfo requestInfo = new RequestInfo();
         try {
+            if(StringUtils.isBlank(orderVO.getCertName())){
+                return ResponseUtil.error("姓名不能为空");
+            }
+            if(StringUtils.isBlank(orderVO.getCertId())){
+                return ResponseUtil.error("身份证号不能为空");
+            }
+            if(StringUtils.isBlank(orderVO.getCustPhone())){
+                return ResponseUtil.error("联系电话不能为空");
+            }
+            if(StringUtils.isBlank(orderVO.getProvince()) || StringUtils.isBlank(orderVO.getCityCode())
+                    || StringUtils.isBlank(orderVO.getCountyCode())){
+                return ResponseUtil.error("所在地不能为空");
+            }
+
+            //验证资格
+            JSONObject verify = userVerify(orderVO.getCertId(),orderVO.getCertName());
+            //验证不通过
+            if(!String.valueOf(ResponseUtil.SUCCESS_CODE).equals(verify.getString("code"))){
+                return verify;
+            }
             //组装客户信息对象
             CustomInfo customInfo = new CustomInfo();
             customInfo.setCertId(orderVO.getCertId());
@@ -156,14 +209,14 @@ public class KingOrderController {
             msg.setProvince(orderVO.getProvince());
             msg.setCityCode(orderVO.getCityCode());
             msg.setCountyCode(orderVO.getCountyCode());
-            msg.setUserAddr(orderVO.getUserAddr());
+            msg.setUserAddr(StringUtils.isBlank(orderVO.getUserAddr())? null:orderVO.getUserAddr());
             msg.setCustomInfo(customInfo);
             JSONObject mg = JSONObject.parseObject(JSONObject.toJSONString(msg));
 
             //时间戳
             long timestamp = DateUtil.getcurrentTimeSec();
             //交易流水
-            String busiSerial = UUID.randomUUID().toString();
+            String busiSerial = BusinessUtil.getBusinessSerialNo(Constants.uid,timestamp);;
 
             //组装表单对象
             RequestObj order = new RequestObj();
@@ -187,10 +240,55 @@ public class KingOrderController {
             log.info("==============url[" + url + "]=================");
             String result = HttpClientUtil.doGet(url.toString());
             log.info(result);
-            return result;
+            //组装请求数据
+            requestInfo.setBusiSerialNo(busiSerial);
+            requestInfo.setRequestType(Constants.REQUEST_TYPE_SUBMIT);
+            requestInfo.setRequestUrl(url.toString());
+            requestInfo.setResponseResult(result);
+            requestInfo.setRequestData(JSONObject.toJSONString(order));
+            requestInfo.setSuccessFlg(Constants.SUCCESS_FLG_FAIL);
+
+            if(StringUtils.isNotBlank(result)){
+                JSONObject resultJson = JSONObject.parseObject(result);
+                //调用成功
+                if(Constants.KING_ORDER_SUCCESS_CODE
+                        .equals(resultJson.getString(Constants.KING_ORDER_RESP_CODE_KEY))){
+                    if(resultJson.containsKey("result")){
+                        JSONObject rj = resultJson.getJSONObject("result");
+                        if(rj != null && rj.containsKey("body") && rj.getJSONObject("body").containsKey("root")){
+                            //返回码
+                            String respCode = rj.getJSONObject("body").getJSONObject("root")
+                                    .getString(Constants.KING_ORDER_RESP_CODE_KEY);
+                            //表示成功
+                            if("suc".equals(respCode)){
+                                //请求成功
+                                requestInfo.setSuccessFlg(Constants.SUCCESS_FLG_SUCCESS);
+                                return ResponseUtil.success("订单提交成功");
+                            }
+                        }
+                    }
+                    return ResponseUtil.success("系统繁忙，请重新提交");
+                }else{
+                    String message = "系统繁忙，请重新提交";
+
+                    return ResponseUtil.error(message);
+                }
+            }
+            return ResponseUtil.error("系统繁忙，请重新提交");
         }catch (Exception e){
             log.error(e.getMessage(),e);
             return ResponseUtil.error("系统繁忙，请重新提交");
+        }finally {
+            //保存请求信息
+            if(StringUtils.isNotBlank(requestInfo.getBusiSerialNo())){
+                try {
+                    requestInfoService.save(requestInfo);
+                }catch (Exception e){
+                    log.info("插入请求信息异常,请求对象:", JSONObject.toJSONString(requestInfo));
+                    log.info("请求对象:");
+                    log.error(e.getMessage(),e);
+                }
+            }
         }
     }
 }
