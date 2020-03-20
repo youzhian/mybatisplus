@@ -222,7 +222,7 @@
             //表单验证通过
             if(checkFormDate()){
 
-                let url = /*[[@{/kingOrder/orderSubmit}]]*/;
+                let url = /*[[@{/kingOrder/orderSubmit}]]*/"";
 
                 let certName = $("#certName").val();
 
@@ -251,13 +251,12 @@
                     },
                     success:function(data){
                         console.log(data);
+                        $.hideLoading();
                         var code = data.code;
                         var message = data.message;
                         if(code == 200){
-                            $.alert("提交成功","提示",function () {
-                                //重载
-                                window.location.reload();
-                            });
+                            $.toast("提交成功");
+                            clearForm();
                         }else{
                             $.toast(message,"text");
                         }
@@ -267,7 +266,10 @@
                         //表示已经提交完成
                         submitFlg = false;
                         //$("#submitBtn").css("background-color","#daa95d").html("立即提交 免费送货上门");
-                        $.hideLoading();
+                        setTimeout(function () {
+                            $.hideLoading();
+                        },3000);
+
                     }
                 });
             }
@@ -335,6 +337,13 @@
         }
 
         return true;
+    }
+    //清楚表单数据
+    function clearForm() {
+        $("#certName").val("");
+        $("#custPhone").val("");
+        $("#certId").val("");
+        $("#userAddr").val("");
     }
     /*]]>*/
 </script>
