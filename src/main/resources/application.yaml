@@ -1,15 +1,15 @@
 server:
   port: 8380
   servlet:
-    context-path: /kingorder
+    context-path: /
 spring:
   application:
     name: naliwan-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://106.14.120.172:3306/korder?useUnicode=true&characterEncoding=utf8
-    username: aimp
-    password: Aimp@123
+    url: jdbc:mysql://localhost:3306/kingorder?useUnicode=true&characterEncoding=utf8
+    username: kingorder
+    password: sjY8TaacE8aCH775
   redis:
     database: 0
     host: 106.14.120.172

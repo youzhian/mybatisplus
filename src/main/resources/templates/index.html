@@ -137,6 +137,17 @@
         .desc>div:first-child {
             color: red;
         }
+        .collapse{
+            margin-left: 45%;
+            border: solid 3px #999;
+            border-top: 10px;
+            border-left: 10px;
+            display: inline-block;
+            height: 20px;
+            width: 20px;
+            transform: rotate(45deg);
+            transition: transform 0.2s;
+        }
     </style>
     <link rel="stylesheet" th:href="@{/static/css/weui.min.css}">
     <link rel="stylesheet" th:href="@{/static/css/jquery-weui.css}">
@@ -155,7 +166,7 @@
                 <div class="infor">
                     <div><span>姓名</span><input id="certName" name="certName" type="text" placeholder="请输入有效证件姓名"></div>
                     <div><span>联系电话</span><input id="custPhone" name="custPhone" type="text" placeholder="请输入联系电话"></div>
-                    <div><span>证件类型</span><input id="type" readonly placeholder="请选择证件类型" value="" data-values="0"/></div>
+                    <p class="collapse" id="jiantou" status="1"></p>
                     <div id="careIdDiv" style="display: none;"><span>身份证号</span><input id="certId" name="certId" type="text" placeholder="请输入身份证"></div>
                 </div>
                 <div class="title">请填写配送地址</div>
@@ -204,6 +215,7 @@
     var cityCode = "";
     var countyCode = "";
     $(function () {
+
         //是否正在提交标识
         let submitFlg = false;
         $("#type").select({
@@ -226,6 +238,22 @@
                 province = values[0];
                 cityCode = values[1];
                 countyCode = values[2];
+            }
+        });
+        //为箭头添加点击事件
+        $("#jiantou").on("click",function (e) {
+            console.log(e)
+            let dom = $("#jiantou")
+            let status = dom.attr("status");
+            if(status == "1"){
+                dom.css("transform","rotate(225deg)")
+                dom.attr("status","2")
+                $("#careIdDiv").show();
+
+            }else{
+                $("#careIdDiv").hide();
+                dom.css("transform","rotate(45deg)")
+                dom.attr("status","1")
             }
         });
         $("#submitBtn").on("click",function () {
@@ -320,16 +348,17 @@
             $("#custPhone").focus();
             return false;
         }
-        if(type != "1"){
-            $.toast("请选择证件类型","text");
-            $("#type").focus();
-            return false;
-        }
         if(certId == null || certId == ""){
+            if($("#jiantou").attr("status") == "1"){
+                $("#jiantou").click();
+            }
             $.toast("请填写您的身份证号","text");
             $("#certId").focus();
             return false;
         }else if(!checkCard(certId)){
+            if($("#jiantou").attr("status") == "1"){
+                $("#jiantou").click();
+            }
             $.toast("身份证号格式不正确","text");
             $("#certId").focus();
             return false;
