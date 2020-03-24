@@ -155,7 +155,8 @@
                 <div class="infor">
                     <div><span>姓名</span><input id="certName" name="certName" type="text" placeholder="请输入有效证件姓名"></div>
                     <div><span>联系电话</span><input id="custPhone" name="custPhone" type="text" placeholder="请输入联系电话"></div>
-                    <div><span>身份证</span><input id="certId" name="certId" type="text" placeholder="请输入身份证"></div>
+                    <div><span>证件类型</span><input id="type" readonly placeholder="请选择证件类型" value="" data-values="0"/></div>
+                    <div id="careIdDiv" style="display: none;"><span>身份证号</span><input id="certId" name="certId" type="text" placeholder="请输入身份证"></div>
                 </div>
                 <div class="title">请填写配送地址</div>
                 <div class="infor">
@@ -205,7 +206,20 @@
     $(function () {
         //是否正在提交标识
         let submitFlg = false;
-
+        $("#type").select({
+            title:"请选择证件类型",
+            items:[{title:"--请选择--",value:"0"},{title:"身份证",value:"1"}],
+            onChange:function(e){
+                console.log(e)
+                let value = e.values;
+                $("#type").attr("data-values",value);
+                if(value == "1"){
+                    $("#careIdDiv").show();
+                }else{
+                    $("#careIdDiv").hide();
+                }
+            }
+        });
         $("#start").cityPicker({
             title: "选择所在地",
             onChange: function (picker, values, displayValues) {
@@ -285,6 +299,7 @@
         let custPhone = $("#custPhone").val();
         let certId = $("#certId").val();
         let userAddr = $("#userAddr").val();
+        let type = $("#type").attr("data-values");
 
         if(certName == null || certName == ""){
             $.toast("请填写您的姓名信息","text");
@@ -305,7 +320,11 @@
             $("#custPhone").focus();
             return false;
         }
-
+        if(type != "1"){
+            $.toast("请选择证件类型","text");
+            $("#type").focus();
+            return false;
+        }
         if(certId == null || certId == ""){
             $.toast("请填写您的身份证号","text");
             $("#certId").focus();
