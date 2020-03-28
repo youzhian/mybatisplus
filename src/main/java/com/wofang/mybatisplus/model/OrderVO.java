@@ -22,9 +22,17 @@ public class OrderVO {
      */
     private String province;
     /**
+     * 归属地省份
+     */
+    private String ownerProvince;
+    /**
      * 城市code
      */
     private String cityCode;
+    /**
+     * 归属地城市编码
+     */
+    private String ownerCityCode;
     /**
      * 区县code
      */
@@ -33,6 +41,10 @@ public class OrderVO {
      * 用户详细地址
      */
     private String userAddr;
+    /**
+     * 所选号码
+     */
+    private String serialNumber;
 
     /**
      * 获取 证件号
@@ -158,5 +170,29 @@ public class OrderVO {
      */
     public void setUserAddr(String userAddr) {
         this.userAddr = userAddr;
+    }
+
+    public String getOwnerProvince() {
+        return ownerProvince;
+    }
+
+    public void setOwnerProvince(String ownerProvince) {
+        this.ownerProvince = ownerProvince;
+    }
+
+    public String getOwnerCityCode() {
+        return ownerCityCode;
+    }
+
+    public void setOwnerCityCode(String ownerCityCode) {
+        this.ownerCityCode = ownerCityCode;
+    }
+
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
     }
 }

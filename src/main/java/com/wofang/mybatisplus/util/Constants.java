@@ -34,11 +34,11 @@ public final class Constants {
     /**
      * 用户ID
      */
-    public static final String uid = "gdzx";
+    public static final String uid = "jixian";
     /**
      * MD5加密时所需的key
      */
-    public static final String KEY = "gdzx18853289xzdg";
+    public static final String KEY = "jx10253#947+xj--";
     /**
      * key在请求参数中的参数名
      */
@@ -51,7 +51,8 @@ public final class Constants {
     /**
      * 用户资格验证请求地址
      */
-    public static final String URL_USER_VERIFY = "https://www.73110010.com/portal/woSale/query/userVerify";
+    //public static final String URL_USER_VERIFY = "https://www.73110010.com/portal/woSale/query/userVerify";
+    public static final String URL_USER_VERIFY = "https://www.73110010.com/portal/simpleWoSale/query/checkAllowedOrder";
     /**
      * 大王卡表单提交
      */
@@ -59,7 +60,7 @@ public final class Constants {
     /**
      * 产品ID
      */
-    public static final String PRODUCT_PRODUCT_ID = "871610241535";
+    public static final String PRODUCT_PRODUCT_ID = "981610241535";
     /**
      * 产品code
      */

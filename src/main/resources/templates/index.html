@@ -2,8 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1, minimum-scale=1, user-scalable=no,uc-fitscreen=yes">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1, minimum-scale=1, user-scalable=no,uc-fitscreen=yes"/>
     <title>腾讯大王卡</title>
     <style>
         * {
@@ -166,6 +166,21 @@
                 <div class="infor">
                     <div><span>姓名</span><input id="certName" name="certName" type="text" placeholder="请输入有效证件姓名"></div>
                     <div><span>联系电话</span><input id="custPhone" name="custPhone" type="text" placeholder="请输入联系电话"></div>
+                    <div><p style="display: inline-block;width: 25%;">归属地</p>
+                        <div style="display: inline-block;" id="sel_city2"><input id="start2" placeholder="点击选取省市" value=""/></div>
+                    </div>
+                    <div class="weui-cells" style="height: 56px;margin-top: 0px;">
+                        <a class="weui-cell weui-cell_access">
+                            <div class="weui-cell__bd">
+                                <p style="font-size: 14px;font-weight: bold;margin-left: -10px;margin-top:-7px;">选择号码
+                                    <input style="margin-left:14px;" type="tel" value="" id="selectNo" placeholder="预选号码" readonly/>
+                                    <img style="max-height: 10px;max-width: 10px;margin-left: -15%;"
+                                         th:src="@{/static/images/close.png}" title="删除" alt="删除" id="closeImg" onclick="removeSelect()">
+                                </p>
+                            </div>
+                            <div class="weui-cell__ft" style="font-size: 12px;margin-top: -12px;" onclick="selectNo();">点击选择</div>
+                        </a>
+                    </div>
                     <p class="collapse" id="jiantou" status="1"></p>
                     <div id="careIdDiv" style="display: none;"><span>身份证号</span><input id="certId" name="certId" type="text" placeholder="请输入身份证"></div>
                 </div>
@@ -195,7 +210,53 @@
                     </div>
                 </div>
             </div>
+
         </section>
+            <div id="popupDiv" class="weui-popup__container popup-bottom" style="align-content: center;">
+                <div class="weui-popup__overlay"></div>
+                <div class="weui-popup__modal" style="min-height: 60%;max-width: 600px;">
+                    <div class="toolbar">
+                        <div class="toolbar-inner">
+                            <a href="javascript:;" class="picker-button close-popup">关闭</a>
+                            <h1 class="title">选取手机号</h1>
+                        </div>
+                    </div>
+                    <div class="modal-content">
+                        <div class="weui-cells">
+                            <div class="weui-cell">
+                                <div class="weui-cell__hd"><label class="weui-label">手机尾号</label></div>
+                                <div class="weui-cell__bd">
+                                    <input class="weui-input" id="searchValue" type="number" pattern="[0-4]*" placeholder="输入2-4位手机尾号">
+                                </div>
+                                <div class="weui-cell__ft">
+                                    <button  class="weui-vcode-btn" id="queryNumber">查询</button>
+                                </div>
+                            </div>
+                            <div class="weui-cells" id="nums">
+                                <div class="weui-cell">
+                                    <div class="weui-cell__bd">
+                                        <p num="15601500408">15601500408</p>
+                                    </div>
+                                    <div class="weui-cell__ft">
+                                        <p num="15601500461">15601500461</p>
+                                    </div>
+                                </div>
+                                <div class="weui-cell">
+                                    <div class="weui-cell__bd">
+                                        <p num="15601500409">15601500409</p>
+                                        <p num="15601500409">15601500409</p>
+                                    </div>
+                                </div>
+                                <div class="weui-cell">
+                                    <div class="weui-cell__bd">
+                                        <p num="15601500410">15601500410</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </form>
         <!-- 表单模块 end -->
         <div style="font-size:0;margin-top: -1px;"><img th:src="@{/static/images//04.jpg}" alt=""></div>
@@ -214,22 +275,25 @@
     var province = "";
     var cityCode = "";
     var countyCode = "";
+    //归属地省份
+    var ownerProvince = "";
+    //归属地城市
+    var ownerCityCode = "";
     $(function () {
-
+        if($("#selectNo").val() != ""){
+            $("#closeImg").show();
+        }else {
+            $("#closeImg").hide();
+        }
         //是否正在提交标识
         let submitFlg = false;
-        $("#type").select({
-            title:"请选择证件类型",
-            items:[{title:"--请选择--",value:"0"},{title:"身份证",value:"1"}],
-            onChange:function(e){
-                console.log(e)
-                let value = e.values;
-                $("#type").attr("data-values",value);
-                if(value == "1"){
-                    $("#careIdDiv").show();
-                }else{
-                    $("#careIdDiv").hide();
-                }
+        //归属地地址选择器
+        $("#start2").cityPicker({
+            title: "选择归属地",
+            showDistrict:false,
+            onChange: function (picker, values, displayValues) {
+                ownerProvince = values[0];
+                ownerCityCode = values[1];
             }
         });
         $("#start").cityPicker({
@@ -318,6 +382,51 @@
             }
 
         });
+        $("#nums").on("click","p[num]",function (e) {
+            var dom = $(this);
+            var num = dom.attr("num");
+            console.log(num);
+            selectNumber(num);
+        })
+        //绑定查询事件
+        $("#queryNumber").on("click",function () {
+
+            let searchValue = $("#searchValue").val();
+            let url = /*[[@{/kingOrder/querySelectNumber}]]*/"";
+
+            let data = {"provinceCode":ownerProvince,"cityCode":ownerCityCode,"searchValue":searchValue};
+
+            $.ajax({
+                type:"post",
+                url:url,
+                cache: false,
+                async: true,
+                data:data,
+                dataType: 'json',
+                beforeSend:function(e){
+                    console.log("to du beforeSend");
+                    //设置为true,表示正在提交
+                    submitFlg = true;
+                },
+                success:function(data){
+                    console.log(data);
+                    var code = data.code;
+                    var message = data.message;
+                    if(code == 200){
+                       var nums = data.data;
+                       if(nums != null){
+                           console.log(nums);
+                       }
+                    }else{
+                        $.toast(message,"text");
+                    }
+                },
+                complete:function (e) {
+                    //表示已经提交完成
+                    submitFlg = false;
+                }
+            });
+        });
     })
     /**
      * 检查表单数据
@@ -365,18 +474,18 @@
         }
         if(province == null || province == ""){
             $.toast("请选择您的所在区域","text");
-            $("#certId").focus();
+            $("#start").focus();
             return false;
         }
 
         if(cityCode == null || cityCode == ""){
             $.toast("请选择您的所在区域","text");
-            $("#certId").focus();
+            $("#start").focus();
             return false;
         }
         if(countyCode == null || countyCode == ""){
             $.toast("请选择您的所在区域","text");
-            $("#certId").focus();
+            $("#start").focus();
             return false;
         }
         if(userAddr == null || userAddr == ""){
@@ -384,7 +493,6 @@
             $("#userAddr").focus();
             return false;
         }
-
         return true;
     }
     //清楚表单数据
@@ -393,6 +501,27 @@
         $("#custPhone").val("");
         $("#certId").val("");
         $("#userAddr").val("");
+    }
+    /*
+     * 选择手机号
+     */
+    function selectNo() {
+        if(ownerProvince == "" || ownerCityCode == ""){
+            $.toast("请先选择手机号归属地","text");
+            return;
+        }
+        $("#popupDiv").popup();
+    }
+    //选中号码后
+    function selectNumber(num) {
+        $("#selectNo").val(num);
+        $("#closeImg").show();
+        $.closePopup();
+    }
+    //删除选中的号码
+    function removeSelect() {
+        $("#selectNo").val("");
+        $("#closeImg").hide();
     }
     /*]]>*/
 </script>

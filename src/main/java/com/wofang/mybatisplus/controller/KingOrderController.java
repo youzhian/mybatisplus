@@ -1,5 +1,6 @@
 package com.wofang.mybatisplus.controller;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.wofang.mybatisplus.model.*;
 import com.wofang.mybatisplus.service.ProvinceCityCountyService;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
@@ -73,24 +75,23 @@ public class KingOrderController {
     }
     /**
      * 验证客户是否有资格参与大王卡计划
-     * @param certNum 证件号
-     * @param custName 证件号客户姓名
+     * @param contactPhone 联系电话
+     * @param certId 证件号
      * @return
      */
     @RequestMapping("userVerify")
-    public JSONObject userVerify(String certNum,String custName){
+    public JSONObject userVerify(String certId,String contactPhone){
 
-        if(StringUtils.isNotBlank(certNum) && StringUtils.isNotBlank(custName)){
+        if(StringUtils.isNotBlank(contactPhone) && StringUtils.isNotBlank(certId)){
             //请求参数
             RequestInfo requestInfo = new RequestInfo();
             try {
-                //请求信息主体
-                JSONObject request = new JSONObject();
-                request.put("CertNum",certNum);
-                request.put("CustName",custName);
                 //请求消息
                 JSONObject userVerifyMsg = new JSONObject();
-                userVerifyMsg.put("Request",request);
+                userVerifyMsg.put("contactPhone",contactPhone);
+                userVerifyMsg.put("certId",certId);
+                userVerifyMsg.put("goodsId",Constants.PRODUCT_PRODUCT_ID);
+
                 //获取到秒的时间戳
                 long timestamp = DateUtil.getcurrentTimeSec();
                 //交易流水号
@@ -137,14 +138,26 @@ public class KingOrderController {
                     //成功
                     if(Constants.KING_ORDER_SUCCESS_CODE
                             .equals(resultJson.getString(Constants.KING_ORDER_RESP_CODE_KEY))){
-                        //请求成功
-                        requestInfo.setSuccessFlg(Constants.SUCCESS_FLG_SUCCESS);
-                        return ResponseUtil.success("资格校验通过");
-                    }else{
-                        String message = "身份信息错误";
-                        if("9999".equals(resultJson.getString(Constants.KING_ORDER_RESP_CODE_KEY))){
-                            message = "身份证号码不合法";
+                        if(resultJson.containsKey("result")
+                                && resultJson.getJSONObject("result").containsKey("body")){
+                            String resultCode = resultJson.getJSONObject("result").getJSONObject("body").getString("resultCode");
+                            if(Constants.KING_ORDER_SUCCESS_CODE
+                                    .equals(resultCode)){
+                                //请求成功
+                                requestInfo.setSuccessFlg(Constants.SUCCESS_FLG_SUCCESS);
+                                return ResponseUtil.success("资格校验通过");
+                            }else{
+                                return ResponseUtil.success(resultJson.getJSONObject("result").getJSONObject("body")
+                                        .getString("resultDesc"));
+                            }
                         }
+
+                    }else{
+                        resultJson.getString("respDesc");
+                        String message = resultJson.getString("respDesc");
+                        /*if("9999".equals(resultJson.getString(Constants.KING_ORDER_RESP_CODE_KEY))){
+                            message = "身份证号码不合法";
+                        }*/
                         return ResponseUtil.error(message);
                     }
                 }
@@ -195,7 +208,7 @@ public class KingOrderController {
                 return ResponseUtil.error("详细地址不能为空");
             }
             //验证资格
-            JSONObject verify = userVerify(orderVO.getCertId(),orderVO.getCertName());
+            JSONObject verify = userVerify(orderVO.getCertId(),orderVO.getCustPhone());
             //验证不通过
             if(!String.valueOf(ResponseUtil.SUCCESS_CODE).equals(verify.getString("code"))){
                 return verify;
@@ -218,7 +231,7 @@ public class KingOrderController {
             //时间戳
             long timestamp = DateUtil.getcurrentTimeSec();
             //交易流水
-            String busiSerial = BusinessUtil.getBusinessSerialNo(Constants.uid,timestamp);;
+            String busiSerial = BusinessUtil.getBusinessSerialNo(Constants.uid,timestamp);
 
             //组装表单对象
             RequestObj order = new RequestObj();
@@ -292,5 +305,83 @@ public class KingOrderController {
                 }
             }
         }
+    }
+
+    /**
+     * 查询可选号码
+     * @param provinceCode 归属地省份
+     * @param cityCode 归属地城市
+     * @param searchValue 尾数
+     * @return
+     */
+    @RequestMapping("querySelectNumber")
+    public Object querySelectNumber(String provinceCode,String cityCode,String searchValue){
+        if(StringUtils.isBlank(provinceCode) || StringUtils.isBlank(cityCode)){
+            return ResponseUtil.error("请选择归属地");
+        }
+        //请求地址
+        String url = "https://www.73110010.com/portal/simpleWoSale/query/selectNumber";
+
+        JSONObject request = new JSONObject();
+
+        JSONObject msg = new JSONObject();
+        msg.put("provinceCode",provinceCode);
+        msg.put("cityCode",cityCode);
+        msg.put("goodsId",Constants.PRODUCT_PRODUCT_ID);
+        if(StringUtils.isNotBlank(searchValue)){
+            msg.put("searchCategory","3");
+            msg.put("searchType","02");
+            msg.put("searchValue",searchValue);
+        }
+        //时间戳
+        long timestamp = DateUtil.getcurrentTimeSec();
+        //交易流水
+        String busiSerial = BusinessUtil.getBusinessSerialNo(Constants.uid,timestamp);
+        request.put("msg",msg);
+        request.put("timestamp",timestamp);
+        request.put("uid",Constants.uid);
+        request.put("busiSerial",busiSerial);
+
+        //生成签名
+        String sing = MD5Utils.createSign2(Constants.CHARACTER_ENCODING_UTF8,request,Constants.KEY,Constants.KEY_NAME,true);
+        request.put("sign",sing);
+        log.info(request.toJSONString());
+        String key = null;
+        try {
+            key = AESPlus.encrypt(request.toJSONString(), Constants.KEY);
+            key = URLEncoder.encode(key, Constants.CHARACTER_ENCODING_UTF8);
+            StringBuilder urlSb = new StringBuilder();
+            urlSb.append(url).append("?").append("uid=").append(Constants.uid);
+            urlSb.append("&key=").append(key).append("&bs64=0");
+            log.info("==============url[" + url + "]=================");
+            String result = HttpClientUtil.doGet(url.toString());
+            log.info(result);
+            if(StringUtils.isNotBlank(result)){
+                JSONObject resultJSON = JSONObject.parseObject(result);
+                if(resultJSON.containsKey("result") && resultJSON.getJSONObject("result").containsKey("body")){
+                    if(resultJSON.getJSONObject("result").getJSONObject("body").containsKey("numList")){
+                        JSONArray numList = resultJSON.getJSONObject("result").getJSONObject("body").getJSONArray("numList");
+                        if(numList.isEmpty()){
+                            return ResponseUtil.success("未查询到符合条件的号码");
+                        }
+                        //手机号集合
+                        List<String> nums = new ArrayList<>();
+                        for(int i=0;i < numList.size();i++){
+                            JSONObject jo = numList.getJSONObject(i);
+                            nums.add(jo.getString("serialNumber"));
+                        }
+                        if(!nums.isEmpty()){
+                            return ResponseUtil.success("查询成功",nums);
+                        }
+                    }
+                    return ResponseUtil.success("未查询到符合条件的号码");
+                }
+            }
+            return ResponseUtil.success("查询失败");
+        } catch (UnsupportedEncodingException e) {
+            log.error(e.getMessage(),e);
+            return ResponseUtil.error("系统繁忙，请再次尝试");
+        }
+
     }
 }
