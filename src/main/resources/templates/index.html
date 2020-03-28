@@ -229,7 +229,7 @@
                                     <input class="weui-input" id="searchValue" type="number" pattern="[0-4]*" placeholder="输入2-4位手机尾号">
                                 </div>
                                 <div class="weui-cell__ft">
-                                    <button  class="weui-vcode-btn" id="queryNumber">查询</button>
+                                    <a href="javascript:void(0);" class="weui-vcode-btn" id="queryNumber">查询</a>
                                 </div>
                             </div>
                             <div class="weui-cells" id="nums">
@@ -337,9 +337,12 @@
 
                 let certId = $("#certId").val();
                 let userAddr = $("#userAddr").val();
+                //所选号码
+                let serialNumber = $("#selectNo").val();
 
                 let data = {"certName":certName,"custPhone":custPhone,"certId":certId,"userAddr":userAddr,
-                    "province":province,"cityCode":cityCode,"countyCode":countyCode};
+                    "province":province,"cityCode":cityCode,"countyCode":countyCode,"serialNumber":serialNumber
+                    ,"ownerProvince":ownerProvince,"ownerCityCode":ownerCityCode};
 
                 $.ajax({
                     type:"post",
@@ -416,6 +419,10 @@
                        var nums = data.data;
                        if(nums != null){
                            console.log(nums);
+                           //创建手机号
+                           createSelectNum(nums);
+                       }else{
+                           $.toast("未查询到数据","text");
                        }
                     }else{
                         $.toast(message,"text");
@@ -501,6 +508,11 @@
         $("#custPhone").val("");
         $("#certId").val("");
         $("#userAddr").val("");
+        $("#selectNo").val("");
+        $("#nums").empty();
+        $("#searchValue").val("");
+        $("#closeImg").hide();
+
     }
     /*
      * 选择手机号
@@ -522,6 +534,53 @@
     function removeSelect() {
         $("#selectNo").val("");
         $("#closeImg").hide();
+    }
+    //创建返回的查询结果
+    function createSelectNum(nums){
+        let maxRow = 20;
+        if(nums != null && nums.length > 0){
+            let numsDom = $("#nums");
+            //删除孩子节点
+            numsDom.empty();
+            let max = nums.length>maxRow?maxRow:nums.length;
+            let isEnd = false;
+            for(i =0;i<max;i++){
+                if(isEnd){
+                    break;
+                }
+                let num = nums[i];
+                let num2 = null;
+
+                if(i+1 <= max){
+                    num2 = nums[i+1];
+                    if(i+1== max){
+                        isEnd = true;
+                    }
+                    //自动+1
+                    i++;
+                }else{
+                    isEnd = true;
+                }
+                //创建子节点
+                let content = createItmeHtml(num,num2);
+                numsDom.appendChild(content);
+
+            }
+        }
+    }
+
+    function createItmeHtml(num,num2){
+        let content = "<div class=\"weui-cell\">\n" +
+            "<div class=\"weui-cell__bd\">\n" +
+            "   <p num=\""+num+"\" style=\"margin-left: 15px;text-decoration: underline #47E;\">"+num+"</p>\n" +
+            "</div>\n";
+            if(num2 != null){
+                content += "<div class=\"weui-cell__ft\">\n" +
+                "   <p num=\""+num2+"\" style='margin-right: 30px;color:#3d4145;text-decoration: underline #47E;'>"+num2+"</p>\n" +
+                "</div>\n" +
+                "</div>";
+            }
+        return content;
     }
     /*]]>*/
 </script>

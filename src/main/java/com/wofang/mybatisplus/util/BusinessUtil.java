@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.sound.midi.Soundbank;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -82,5 +83,24 @@ public class BusinessUtil {
         Map<String,Object> params = new HashMap<>();
 
         return params;
+    }
+
+    /**
+     * 返回长度为【strLength】的随机数，在前面补0
+     * @param strLength 长度
+     * @return 随机数
+     */
+    public static String getFixLengthString(int strLength) {
+
+        Random rm = new Random();
+
+        // 获得随机数
+        double pross = (1 + rm.nextDouble()) * Math.pow(10, strLength);
+
+        // 将获得的获得随机数转化为字符串
+        String fixLengthString = String.valueOf(pross);
+
+        // 返回固定的长度的随机数
+        return fixLengthString.substring(1, strLength + 1);
     }
 }

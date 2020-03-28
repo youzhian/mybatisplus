@@ -219,6 +219,7 @@ public class KingOrderController {
             customInfo.setCertName(orderVO.getCertName());
             customInfo.setCertType(Constants.CERT_TYPE_ID);
             customInfo.setCustPhone(orderVO.getCustPhone());
+
             //组装消息体
             KOrderMsg msg = KOrderMsg.init();
             msg.setProvince(orderVO.getProvince());
@@ -227,6 +228,30 @@ public class KingOrderController {
             msg.setUserAddr(orderVO.getUserAddr());
             msg.setCustomInfo(customInfo);
             JSONObject mg = JSONObject.parseObject(JSONObject.toJSONString(msg));
+
+            String proKey = "";
+            if(StringUtils.isNotBlank(orderVO.getSerialNumber())){
+
+                if(StringUtils.isBlank(orderVO.getOwnerProvince())
+                        || StringUtils.isBlank(orderVO.getOwnerCityCode())){
+                    return ResponseUtil.error("请选择号码归属地");
+                }
+                //生成抢占资源key,由99999+随机数组成，共16位正整数
+                proKey = "99999"+BusinessUtil.getFixLengthString(11);
+                //占号接口
+                boolean state =  changeNumState(orderVO.getOwnerProvince(),orderVO.getCityCode(),proKey,orderVO.getSerialNumber());
+                if(!state){
+                    return ResponseUtil.error("预选号码失败,请重新选择");
+                }
+                //是否选号，1为是
+                mg.put("is_selected_number","1");
+                mg.put("proKey",proKey);
+                mg.put("proType","268");
+                mg.put("numberProvince",orderVO.getOwnerProvince());
+                mg.put("numberCity",orderVO.getOwnerCityCode());
+                mg.put("serialNumber",orderVO.getSerialNumber());
+
+            }
 
             //时间戳
             long timestamp = DateUtil.getcurrentTimeSec();
@@ -377,11 +402,68 @@ public class KingOrderController {
                     return ResponseUtil.success("未查询到符合条件的号码");
                 }
             }
-            return ResponseUtil.success("查询失败");
+            return ResponseUtil.error("查询失败");
         } catch (UnsupportedEncodingException e) {
             log.error(e.getMessage(),e);
             return ResponseUtil.error("系统繁忙，请再次尝试");
         }
 
+    }
+
+    /**
+     * 选占号码，不做参数校验
+     * @param provinceCode 归属地身份
+     * @param cityCode 归属地城市
+     * @param proKey 资源预占关键字 要与表单提交时的一致
+     * @param serialNumber 预占手机号
+     * @return true 表示成功，false 表示失败
+     */
+    public boolean changeNumState(String provinceCode,String cityCode,String proKey,String serialNumber){
+        String url = "https://www.73110010.com/portal/simpleWoSale/order/changeNumState";
+
+        JSONObject msg = new JSONObject();
+        msg.put("provinceCode",provinceCode);
+        msg.put("cityCode",cityCode);
+        msg.put("proKey",serialNumber);
+
+        JSONObject request = new JSONObject();
+        //时间戳
+        long timestamp = DateUtil.getcurrentTimeSec();
+        //交易流水
+        String busiSerial = BusinessUtil.getBusinessSerialNo(Constants.uid,timestamp);
+        request.put("msg",msg);
+        request.put("timestamp",timestamp);
+        request.put("uid",Constants.uid);
+        request.put("busiSerial",busiSerial);
+
+        //生成签名
+        String sing = MD5Utils.createSign2(Constants.CHARACTER_ENCODING_UTF8,request,Constants.KEY,Constants.KEY_NAME,true);
+        request.put("sign",sing);
+        log.info(request.toJSONString());
+        String key = null;
+        try {
+            key = AESPlus.encrypt(request.toJSONString(), Constants.KEY);
+            key = URLEncoder.encode(key, Constants.CHARACTER_ENCODING_UTF8);
+            StringBuilder urlSb = new StringBuilder();
+            urlSb.append(url).append("?").append("uid=").append(Constants.uid);
+            urlSb.append("&key=").append(key).append("&bs64=0");
+            log.info("==============url[" + url + "]=================");
+            String result = HttpClientUtil.doGet(url.toString());
+            log.info(result);
+            if(StringUtils.isNotBlank(result)){
+                JSONObject response = JSONObject.parseObject(result);
+                if(response.containsKey("result")
+                        && response.getJSONObject("result").containsKey("body")){
+                    String respCode = response.getJSONObject("result").getJSONObject("body").getString("respCode");
+                    if(Constants.KING_ORDER_SUCCESS_CODE.equals(respCode)){
+                        return true;
+                    }
+                }
+            }
+        }catch (Exception e){
+            log.error(e.getMessage(),e);
+        }
+
+        return false;
     }
 }
