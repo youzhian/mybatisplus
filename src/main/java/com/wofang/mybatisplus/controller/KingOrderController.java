@@ -237,7 +237,7 @@ public class KingOrderController {
                     return ResponseUtil.error("请选择号码归属地");
                 }
                 //生成抢占资源key,由99999+随机数组成，共16位正整数
-                proKey = "99999"+BusinessUtil.getFixLengthString(11);
+                proKey = "99999"+BusinessUtil.getRandomCodeStr(11);
                 //占号接口
                 boolean state =  changeNumState(orderVO.getOwnerProvince(),orderVO.getCityCode(),proKey,orderVO.getSerialNumber());
                 if(!state){
@@ -344,6 +344,13 @@ public class KingOrderController {
         if(StringUtils.isBlank(provinceCode) || StringUtils.isBlank(cityCode)){
             return ResponseUtil.error("请选择归属地");
         }
+        /*List<String> nums2 = new ArrayList<>();
+        for(int i=0;i<25;i++){
+            nums2.add(BusinessUtil.getRandomCodeStr(11));
+        }
+        nums2 = BusinessUtil.getRandomNumberByMaxLength(nums2,25);
+        if(true)
+            return ResponseUtil.success("成功",nums2);*/
         //请求地址
         String url = "https://www.73110010.com/portal/simpleWoSale/query/selectNumber";
 
@@ -396,13 +403,14 @@ public class KingOrderController {
                             nums.add(jo.getString("serialNumber"));
                         }
                         if(!nums.isEmpty()){
+                            BusinessUtil.getRandomNumberByMaxLength(nums,24);
                             return ResponseUtil.success("查询成功",nums);
                         }
                     }
                     return ResponseUtil.success("未查询到符合条件的号码");
                 }
             }
-            return ResponseUtil.error("查询失败");
+            return ResponseUtil.error("查询失败,请再次尝试");
         } catch (UnsupportedEncodingException e) {
             log.error(e.getMessage(),e);
             return ResponseUtil.error("系统繁忙，请再次尝试");
@@ -441,6 +449,8 @@ public class KingOrderController {
         request.put("sign",sing);
         log.info(request.toJSONString());
         String key = null;
+        //请求信息对象
+        RequestInfo requestInfo = new RequestInfo();
         try {
             key = AESPlus.encrypt(request.toJSONString(), Constants.KEY);
             key = URLEncoder.encode(key, Constants.CHARACTER_ENCODING_UTF8);
@@ -450,18 +460,39 @@ public class KingOrderController {
             log.info("==============url[" + url + "]=================");
             String result = HttpClientUtil.doGet(url.toString());
             log.info(result);
+
+            //组装请求数据
+            requestInfo.setBusiSerialNo(busiSerial);
+            requestInfo.setRequestType(Constants.REQUEST_TYPE_STATE);
+            requestInfo.setRequestUrl(urlSb.toString());
+            requestInfo.setResponseResult(result);
+            requestInfo.setRequestData(request.toJSONString());
+            requestInfo.setSuccessFlg(Constants.SUCCESS_FLG_FAIL);
+
             if(StringUtils.isNotBlank(result)){
                 JSONObject response = JSONObject.parseObject(result);
                 if(response.containsKey("result")
                         && response.getJSONObject("result").containsKey("body")){
                     String respCode = response.getJSONObject("result").getJSONObject("body").getString("respCode");
                     if(Constants.KING_ORDER_SUCCESS_CODE.equals(respCode)){
+                        requestInfo.setSuccessFlg(Constants.SUCCESS_FLG_SUCCESS);
                         return true;
                     }
                 }
             }
         }catch (Exception e){
             log.error(e.getMessage(),e);
+        }finally {
+            //保存请求信息
+            if(StringUtils.isNotBlank(requestInfo.getBusiSerialNo())){
+                try {
+                    requestInfoService.save(requestInfo);
+                }catch (Exception e){
+                    log.info("插入请求信息异常,请求对象:", JSONObject.toJSONString(requestInfo));
+                    log.info("请求对象:");
+                    log.error(e.getMessage(),e);
+                }
+            }
         }
 
         return false;

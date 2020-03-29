@@ -14,6 +14,10 @@ public final class Constants {
      */
     public static final String REQUEST_TYPE_SUBMIT = "2";
     /**
+     * 请求类型-选号
+     */
+    public static final String REQUEST_TYPE_STATE = "3";
+    /**
      * 请求结果-成功
      */
     public static final String SUCCESS_FLG_SUCCESS = "1";

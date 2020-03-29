@@ -4,10 +4,7 @@ import ch.qos.logback.core.net.SyslogOutputStream;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.sound.midi.Soundbank;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BusinessUtil {
@@ -102,5 +99,71 @@ public class BusinessUtil {
 
         // 返回固定的长度的随机数
         return fixLengthString.substring(1, strLength + 1);
+    }
+    /**
+     * 获取一个指定位数的随机码
+     * @return
+     */
+    public static String getRandomCodeStr(Integer length){
+
+        List<Integer> set = getRandomNumber(length);
+        // 使用迭代器
+        Iterator<Integer> iterator = set.iterator();
+        // 临时记录数据
+
+        String temp = "";
+
+        while (iterator.hasNext()) {
+            temp += iterator.next();
+        }
+
+        return temp;
+    }
+    /**
+     * 获取一个四位随机数，并且四位数不重复
+     *
+     * @return Set<Integer>
+     */
+    private static List<Integer> getRandomNumber(Integer length) {
+        // 使用SET以此保证写入的数据不重复
+        List<Integer> set = new ArrayList<>();
+        // 随机数
+        Random random = new Random();
+        while (set.size() < length) {
+            // nextInt返回一个伪随机数，它是取自此随机数生成器序列的、在 0（包括）
+            // 和指定值（不包括）之间均匀分布的 int 值。
+            set.add(random.nextInt(10));
+        }
+        return set;
+    }
+
+    /**
+     * 根据集合与指定个数值，返回随机新集合
+     * @param list 要进行随机取值的集合
+     * @param len 要进行取值的个数
+     * @return
+     */
+    public static <T> List<T> getRandomNumberByMaxLength(List<T> list, int len){
+        if(list != null && len > 0){
+            //若集合个数不大于需返回的个数，则直接返回
+            if(list.size() <= len){
+                return list;
+            }
+            List<T> result = new ArrayList<>();
+
+            int max=len;
+            int min=0;
+            Random random = new Random();
+            Set<Integer> nums = new HashSet<>();
+            while (nums.size() <= max){
+                int s = random.nextInt(max)%(max-min+1) + min;
+                if(!nums.contains(s)){
+                    nums.add(s);
+                    result.add(list.get(s));
+                }
+            }
+            return result;
+        }
+        return null;
     }
 }

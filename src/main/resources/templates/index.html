@@ -173,8 +173,8 @@
                         <a class="weui-cell weui-cell_access">
                             <div class="weui-cell__bd">
                                 <p style="font-size: 14px;font-weight: bold;margin-left: -10px;margin-top:-7px;">选择号码
-                                    <input style="margin-left:14px;" type="tel" value="" id="selectNo" placeholder="预选号码" readonly/>
-                                    <img style="max-height: 10px;max-width: 10px;margin-left: -15%;"
+                                    <tl style="margin-left:24px;color: #999;padding-right: 10px;" value="" id="selectNo"></tl>
+                                    <img style="display:none;max-height: 10px;max-width: 10px;"
                                          th:src="@{/static/images/close.png}" title="删除" alt="删除" id="closeImg" onclick="removeSelect()">
                                 </p>
                             </div>
@@ -232,26 +232,7 @@
                                     <a href="javascript:void(0);" class="weui-vcode-btn" id="queryNumber">查询</a>
                                 </div>
                             </div>
-                            <div class="weui-cells" id="nums">
-                                <div class="weui-cell">
-                                    <div class="weui-cell__bd">
-                                        <p num="15601500408">15601500408</p>
-                                    </div>
-                                    <div class="weui-cell__ft">
-                                        <p num="15601500461">15601500461</p>
-                                    </div>
-                                </div>
-                                <div class="weui-cell">
-                                    <div class="weui-cell__bd">
-                                        <p num="15601500409">15601500409</p>
-                                        <p num="15601500409">15601500409</p>
-                                    </div>
-                                </div>
-                                <div class="weui-cell">
-                                    <div class="weui-cell__bd">
-                                        <p num="15601500410">15601500410</p>
-                                    </div>
-                                </div>
+                            <div class="weui-cells" id="nums" style="max-height: 400px;overflow-y:scroll;">
                             </div>
                         </div>
                     </div>
@@ -280,11 +261,7 @@
     //归属地城市
     var ownerCityCode = "";
     $(function () {
-        if($("#selectNo").val() != ""){
-            $("#closeImg").show();
-        }else {
-            $("#closeImg").hide();
-        }
+
         //是否正在提交标识
         let submitFlg = false;
         //归属地地址选择器
@@ -306,7 +283,6 @@
         });
         //为箭头添加点击事件
         $("#jiantou").on("click",function (e) {
-            console.log(e)
             let dom = $("#jiantou")
             let status = dom.attr("status");
             if(status == "1"){
@@ -321,7 +297,6 @@
             }
         });
         $("#submitBtn").on("click",function () {
-            console.log("submitBtn被触发")
             //若正在提交，则不进行提交操作
             if(submitFlg){
                 return;
@@ -338,7 +313,7 @@
                 let certId = $("#certId").val();
                 let userAddr = $("#userAddr").val();
                 //所选号码
-                let serialNumber = $("#selectNo").val();
+                let serialNumber = $("#selectNo").attr("value");
 
                 let data = {"certName":certName,"custPhone":custPhone,"certId":certId,"userAddr":userAddr,
                     "province":province,"cityCode":cityCode,"countyCode":countyCode,"serialNumber":serialNumber
@@ -352,7 +327,6 @@
                     data:data,
                     dataType: 'json',
                     beforeSend:function(e){
-                        console.log("to du beforeSend");
                         //设置为true,表示正在提交
                         submitFlg = true;
                         $.showLoading("正在提交...")
@@ -360,7 +334,6 @@
 
                     },
                     success:function(data){
-                        console.log(data);
                         $.hideLoading();
                         var code = data.code;
                         var message = data.message;
@@ -372,7 +345,6 @@
                         }
                     },
                     complete:function (e) {
-                        console.log("to du complete");
                         //表示已经提交完成
                         submitFlg = false;
                         //$("#submitBtn").css("background-color","#daa95d").html("立即提交 免费送货上门");
@@ -388,7 +360,6 @@
         $("#nums").on("click","p[num]",function (e) {
             var dom = $(this);
             var num = dom.attr("num");
-            console.log(num);
             selectNumber(num);
         })
         //绑定查询事件
@@ -407,18 +378,15 @@
                 data:data,
                 dataType: 'json',
                 beforeSend:function(e){
-                    console.log("to du beforeSend");
                     //设置为true,表示正在提交
                     submitFlg = true;
                 },
                 success:function(data){
-                    console.log(data);
                     var code = data.code;
                     var message = data.message;
                     if(code == 200){
                        var nums = data.data;
-                       if(nums != null){
-                           console.log(nums);
+                       if(nums != null && nums.length > 0){
                            //创建手机号
                            createSelectNum(nums);
                        }else{
@@ -443,7 +411,7 @@
         let custPhone = $("#custPhone").val();
         let certId = $("#certId").val();
         let userAddr = $("#userAddr").val();
-        let type = $("#type").attr("data-values");
+        let selectNo = $("#selectNo").attr("value");
 
         if(certName == null || certName == ""){
             $.toast("请填写您的姓名信息","text");
@@ -500,6 +468,12 @@
             $("#userAddr").focus();
             return false;
         }
+        if(selectNo != ""){
+            if(ownerProvince == "" || ownerCityCode == ""){
+                $.toast("请选择归属地","text");
+                $("#start2").focus();
+            }
+        }
         return true;
     }
     //清楚表单数据
@@ -508,7 +482,8 @@
         $("#custPhone").val("");
         $("#certId").val("");
         $("#userAddr").val("");
-        $("#selectNo").val("");
+        $("#selectNo").attr("value","");
+        $("#selectNo").html("");
         $("#nums").empty();
         $("#searchValue").val("");
         $("#closeImg").hide();
@@ -526,18 +501,20 @@
     }
     //选中号码后
     function selectNumber(num) {
-        $("#selectNo").val(num);
+        $("#selectNo").attr("value",num);
+        $("#selectNo").html(num);
         $("#closeImg").show();
         $.closePopup();
     }
     //删除选中的号码
     function removeSelect() {
-        $("#selectNo").val("");
+        $("#selectNo").attr("value","");
+        $("#selectNo").html("");
         $("#closeImg").hide();
     }
     //创建返回的查询结果
     function createSelectNum(nums){
-        let maxRow = 20;
+        let maxRow = 24;
         if(nums != null && nums.length > 0){
             let numsDom = $("#nums");
             //删除孩子节点
@@ -563,23 +540,23 @@
                 }
                 //创建子节点
                 let content = createItmeHtml(num,num2);
-                numsDom.appendChild(content);
+                numsDom.append(content);
 
             }
         }
     }
 
     function createItmeHtml(num,num2){
-        let content = "<div class=\"weui-cell\">\n" +
-            "<div class=\"weui-cell__bd\">\n" +
-            "   <p num=\""+num+"\" style=\"margin-left: 15px;text-decoration: underline #47E;\">"+num+"</p>\n" +
-            "</div>\n";
+        let content = "<div class=\"weui-cell\">\n"
+            + "<div class=\"weui-cell__bd\">\n"
+            + "   <p num=\""+num+"\" style=\"margin-left: 15px;text-decoration: underline #47E;\">"+num+"</p>\n"
+            + "</div>\n";
             if(num2 != null){
-                content += "<div class=\"weui-cell__ft\">\n" +
-                "   <p num=\""+num2+"\" style='margin-right: 30px;color:#3d4145;text-decoration: underline #47E;'>"+num2+"</p>\n" +
-                "</div>\n" +
-                "</div>";
+                content += "<div class=\"weui-cell__ft\">\n"
+                 +"   <p num=\""+num2+"\" style='margin-right: 30px;color:#3d4145;text-decoration: underline #47E;'>"+num2+"</p>\n"
+                 + "</div>\n";
             }
+        content += "</div>";
         return content;
     }
     /*]]>*/
