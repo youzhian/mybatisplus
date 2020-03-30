@@ -385,8 +385,8 @@ public class KingOrderController {
             StringBuilder urlSb = new StringBuilder();
             urlSb.append(url).append("?").append("uid=").append(Constants.uid);
             urlSb.append("&key=").append(key).append("&bs64=0");
-            log.info("==============url[" + url + "]=================");
-            String result = HttpClientUtil.doGet(url.toString());
+            log.info("==============url[" + urlSb + "]=================");
+            String result = HttpClientUtil.doGet(urlSb.toString());
             log.info(result);
             if(StringUtils.isNotBlank(result)){
                 JSONObject resultJSON = JSONObject.parseObject(result);
@@ -403,7 +403,7 @@ public class KingOrderController {
                             nums.add(jo.getString("serialNumber"));
                         }
                         if(!nums.isEmpty()){
-                            BusinessUtil.getRandomNumberByMaxLength(nums,24);
+                            nums = BusinessUtil.getRandomNumberByMaxLength(nums,24);
                             return ResponseUtil.success("查询成功",nums);
                         }
                     }
@@ -432,7 +432,8 @@ public class KingOrderController {
         JSONObject msg = new JSONObject();
         msg.put("provinceCode",provinceCode);
         msg.put("cityCode",cityCode);
-        msg.put("proKey",serialNumber);
+        msg.put("proKey",proKey);
+        msg.put("serialNumber",serialNumber);
 
         JSONObject request = new JSONObject();
         //时间戳
@@ -457,8 +458,8 @@ public class KingOrderController {
             StringBuilder urlSb = new StringBuilder();
             urlSb.append(url).append("?").append("uid=").append(Constants.uid);
             urlSb.append("&key=").append(key).append("&bs64=0");
-            log.info("==============url[" + url + "]=================");
-            String result = HttpClientUtil.doGet(url.toString());
+            log.info("==============url[" + urlSb.toString() + "]=================");
+            String result = HttpClientUtil.doGet(urlSb.toString());
             log.info(result);
 
             //组装请求数据

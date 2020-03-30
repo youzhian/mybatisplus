@@ -151,11 +151,11 @@ public class BusinessUtil {
             }
             List<T> result = new ArrayList<>();
 
-            int max=len;
+            int max = list.size() - 1;
             int min=0;
             Random random = new Random();
             Set<Integer> nums = new HashSet<>();
-            while (nums.size() <= max){
+            while (nums.size() < len){
                 int s = random.nextInt(max)%(max-min+1) + min;
                 if(!nums.contains(s)){
                     nums.add(s);

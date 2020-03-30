@@ -269,6 +269,11 @@
             title: "选择归属地",
             showDistrict:false,
             onChange: function (picker, values, displayValues) {
+                if(values[0] != ownerProvince ||values[1] != ownerCityCode){
+                    //将选中的值清空
+                    $("#selectNo").attr("value","").html("");
+                    $("#nums").empty();
+                }
                 ownerProvince = values[0];
                 ownerCityCode = values[1];
             }
@@ -505,6 +510,7 @@
         $("#selectNo").html(num);
         $("#closeImg").show();
         $.closePopup();
+        $("#nums").empty();
     }
     //删除选中的号码
     function removeSelect() {
