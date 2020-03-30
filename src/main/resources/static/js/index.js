@@ -2,7 +2,8 @@
 //身份证号
 function checkCard(context){
     //var str = /^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{4}$/;
-    var reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/
+    //var reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/
+    var reg = /(^\d{18}$)|(^\d{17}(\d|X|x)$)/
     return reg.test(context);
 }
 //电话号码
