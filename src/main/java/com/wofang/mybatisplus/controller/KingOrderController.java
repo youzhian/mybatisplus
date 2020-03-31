@@ -92,7 +92,7 @@ public class KingOrderController {
                 JSONObject userVerifyMsg = new JSONObject();
                 userVerifyMsg.put("contactPhone",contactPhone);
                 userVerifyMsg.put("certId",certId);
-                userVerifyMsg.put("goodsId",Constants.PRODUCT_PRODUCT_ID);
+                userVerifyMsg.put("goodsId",Constants.PRODUCT_PRODUCT_CODE);
 
                 //获取到秒的时间戳
                 long timestamp = DateUtil.getcurrentTimeSec();
@@ -134,6 +134,7 @@ public class KingOrderController {
                 requestInfo.setRequestType(Constants.REQUEST_TYPE_VERIFY);
                 //默认是失败
                 requestInfo.setSuccessFlg(Constants.SUCCESS_FLG_FAIL);
+                requestInfo.setCreateTime(new Date());
 
                 if(StringUtils.isNotBlank(result)){
                     JSONObject resultJson = JSONObject.parseObject(result);
@@ -241,7 +242,7 @@ public class KingOrderController {
                 //生成抢占资源key,由99999+随机数组成，共16位正整数
                 proKey = "99999"+BusinessUtil.getRandomCodeStr(11);
                 //占号接口
-                boolean state =  changeNumState(orderVO.getOwnerProvince(),orderVO.getCityCode(),proKey,orderVO.getSerialNumber());
+                boolean state =  changeNumState(orderVO.getOwnerProvince(),orderVO.getOwnerCityCode(),proKey,orderVO.getSerialNumber());
                 if(!state){
                     return ResponseUtil.error("预选号码失败,请重新选择");
                 }
@@ -289,7 +290,7 @@ public class KingOrderController {
             requestInfo.setResponseResult(result);
             requestInfo.setRequestData(JSONObject.toJSONString(order));
             requestInfo.setSuccessFlg(Constants.SUCCESS_FLG_FAIL);
-
+            requestInfo.setCreateTime(new Date());
             if(StringUtils.isNotBlank(result)){
                 JSONObject resultJson = JSONObject.parseObject(result);
                 //调用成功
@@ -361,7 +362,7 @@ public class KingOrderController {
         JSONObject msg = new JSONObject();
         msg.put("provinceCode",provinceCode);
         msg.put("cityCode",cityCode);
-        msg.put("goodsId",Constants.PRODUCT_PRODUCT_ID);
+        msg.put("goodsId",Constants.PRODUCT_PRODUCT_CODE);
         if(StringUtils.isNotBlank(searchValue)){
             msg.put("searchCategory","3");
             msg.put("searchType","02");
@@ -471,6 +472,7 @@ public class KingOrderController {
             requestInfo.setResponseResult(result);
             requestInfo.setRequestData(request.toJSONString());
             requestInfo.setSuccessFlg(Constants.SUCCESS_FLG_FAIL);
+            requestInfo.setCreateTime(new Date());
 
             if(StringUtils.isNotBlank(result)){
                 JSONObject response = JSONObject.parseObject(result);

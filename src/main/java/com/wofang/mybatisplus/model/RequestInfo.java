@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
+import java.util.Date;
+
 @TableName("request_info")
 public class RequestInfo {
     /**
@@ -42,6 +44,11 @@ public class RequestInfo {
      */
     @TableField("success_flg")
     private String successFlg;
+    /**
+     * 创建时间
+     */
+    @TableField("create_time")
+    private Date createTime;
 
     /**
      * 获取 物理主键
@@ -167,5 +174,23 @@ public class RequestInfo {
      */
     public void setSuccessFlg(String successFlg) {
         this.successFlg = successFlg;
+    }
+
+    /**
+     * 获取 创建时间
+     *
+     * @return createTime 创建时间
+     */
+    public Date getCreateTime() {
+        return this.createTime;
+    }
+
+    /**
+     * 设置 创建时间
+     *
+     * @param createTime 创建时间
+     */
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 }

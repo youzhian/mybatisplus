@@ -64,11 +64,11 @@ public final class Constants {
     /**
      * 产品ID
      */
-    public static final String PRODUCT_PRODUCT_ID = "981610241535";
+    public static final String PRODUCT_PRODUCT_ID = "90063345";
     /**
      * 产品code
      */
-    public static final String PRODUCT_PRODUCT_CODE = "90063345";
+    public static final String PRODUCT_PRODUCT_CODE = "981610241535";
     /**
      * 产品名称
      */
