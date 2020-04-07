@@ -580,4 +580,12 @@ public final class DateUtil {
 		//直接除以1000取整
 		return timeMillis/1000;
 	}
+
+	public static String getStringDate(Date date,String fmtDate){
+		if(date != null && StringUtils.isNotBlank(fmtDate)){
+			SimpleDateFormat sdf = new SimpleDateFormat(fmtDate);
+			return sdf.format(date);
+		}
+		return null;
+	}
 }
