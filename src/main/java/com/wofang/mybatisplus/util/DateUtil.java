@@ -588,4 +588,11 @@ public final class DateUtil {
 		}
 		return null;
 	}
+	public static Date getDate2String(String date,String fmtDate) throws ParseException {
+		if(StringUtils.isNotBlank(date) && StringUtils.isNotBlank(fmtDate)){
+			SimpleDateFormat sdf = new SimpleDateFormat(fmtDate);
+			return sdf.parse(date);
+		}
+		return null;
+	}
 }

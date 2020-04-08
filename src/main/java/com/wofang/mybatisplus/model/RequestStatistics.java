@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -25,7 +26,7 @@ public class RequestStatistics {
     /**
      * 描述
      */
-    String desc;
+    String rsDesc;
     /**
      * 请求IP
      */
@@ -34,6 +35,7 @@ public class RequestStatistics {
      * 创建时间 yyyy-MM-dd HH:mm:SS
      */
     @TableField(value="create_time",jdbcType = JdbcType.TIMESTAMP)
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     Date createTime;
     /**
      * 创建日期 yyyy-MM-dd
@@ -80,19 +82,19 @@ public class RequestStatistics {
     /**
      * 获取 描述
      *
-     * @return desc 描述
+     * @return rsDesc 描述
      */
-    public String getDesc() {
-        return this.desc;
+    public String getRsDesc() {
+        return this.rsDesc;
     }
 
     /**
      * 设置 描述
      *
-     * @param desc 描述
+     * @param rsDesc 描述
      */
-    public void setDesc(String desc) {
-        this.desc = desc;
+    public void setRsDesc(String rsDesc) {
+        this.rsDesc = rsDesc;
     }
 
     /**
@@ -148,4 +150,6 @@ public class RequestStatistics {
     public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
+
+
 }

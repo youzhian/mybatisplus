@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
@@ -35,13 +36,10 @@ public class StatisticsController extends BaseController {
     public JSONObject addRequest(RequestStatistics statistics, HttpServletRequest request){
         if(statistics != null && StringUtils.isNotBlank(statistics.getName())){
             String ip = request.getRemoteHost();
-            //当前时间
-            Date date = new Date();
+            //当前请求地址
             statistics.setRequestIp(ip);
-            statistics.setCreateDate(date);
-            statistics.setCreateTime(date);
             //新增
-            statisticsService.save(statistics);
+            statisticsService.add(statistics);
         }
         return ResponseUtil.success("增加成功");
     }
@@ -52,7 +50,7 @@ public class StatisticsController extends BaseController {
      */
     @RequestMapping("statisticsJFCC")
     public ModelAndView statisticsJFCC() throws Exception {
-        ModelAndView mv = new ModelAndView("/statistics/jfcc");
+        ModelAndView mv = new ModelAndView("statistics/jfcc");
         //当前时间
         Date date = new Date();
         String name = "jfcc1.jk825.top";
@@ -63,13 +61,19 @@ public class StatisticsController extends BaseController {
         query.eq("create_date", DateUtil.parseDate(date));
         //查询当日数据量
         long daytotal = statisticsService.count(query);
+        //精确到时
+        String milin = DateUtil.getStringDate(date,"yyyy-MM-dd HH");
 
-
-
+        query.lambda().ge(RequestStatistics::getCreateTime,milin);
+        //当前时间段数量
+        long hourtotal = statisticsService.count(query);
         //总数
         mv.addObject("total",total);
         //日总数
         mv.addObject("daytotal",daytotal);
+        //时间总数
+        mv.addObject("hourtotal",hourtotal);
+        mv.addObject("time",milin+":00:00~"+milin+":59:59");
 
         return mv;
     }
