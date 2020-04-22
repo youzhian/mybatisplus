@@ -42,6 +42,15 @@ public class RequestStatistics {
      */
     @TableField(value="create_date",jdbcType = JdbcType.DATE)
     Date createDate;
+    /**
+     * 关键字，一般为复制的内容（微信号），这里用于分组统计，
+     */
+    String keyword;
+    /**
+     * 统计数据源
+     */
+    @TableField(exist = false)
+    int count;
 
     /**
      * 获取 物理主键
@@ -151,5 +160,21 @@ public class RequestStatistics {
         this.createDate = createDate;
     }
 
+    /**
+     * 获取 关键字，一般为复制的内容（微信号），这里用于分组统计，
+     *
+     * @return keyword 关键字，一般为复制的内容（微信号），这里用于分组统计，
+     */
+    public String getKeyword() {
+        return this.keyword;
+    }
 
+    /**
+     * 设置 关键字，一般为复制的内容（微信号），这里用于分组统计，
+     *
+     * @param keyword 关键字，一般为复制的内容（微信号），这里用于分组统计，
+     */
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
 }

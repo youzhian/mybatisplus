@@ -6,4 +6,6 @@ import com.wofang.mybatisplus.model.RequestStatistics;
 public interface StatisticsService extends IService<RequestStatistics> {
 
     public RequestStatistics add(RequestStatistics rs);
+
+
 }
