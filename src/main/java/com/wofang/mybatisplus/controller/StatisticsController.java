@@ -16,6 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 数据统计controller
@@ -58,7 +59,10 @@ public class StatisticsController extends BaseController {
         query.eq("name",name);
         //总数
         long total = statisticsService.count(query);
-        query.eq("create_date", DateUtil.parseDate(date));
+
+        String currDate = DateUtil.parseDate(date);
+
+        query.eq("create_date", currDate);
         //查询当日数据量
         long daytotal = statisticsService.count(query);
         //精确到时
@@ -74,7 +78,9 @@ public class StatisticsController extends BaseController {
         //时间总数
         mv.addObject("hourtotal",hourtotal);
         mv.addObject("time",milin+":00:00~"+milin+":59:59");
-
+        //查询每个微信号的统计个数
+        List<JSONObject> list = statisticsService.getCountGroupByKeyword(name,currDate,milin);
+        mv.addObject("list",list);
         return mv;
     }
 }

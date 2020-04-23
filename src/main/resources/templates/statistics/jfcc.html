@@ -15,5 +15,23 @@
 <div>
     <span th:text="|当前时段复制量(${time}): ${hourtotal}|">当前时段复制量:0</span>
 </div>
+<div>
+
+    <span>详细信息：</span>
+    <table border="1">
+        <tr>
+            <th>微信号</th>
+            <th>总复制量</th>
+            <th>今日复制量</th>
+            <th>时段复制量</th>
+        </tr>
+        <tr th:each="data:${list}">
+            <td th:text="${data['keyword']}" style="text-align: right">-</td>
+            <td th:text="${data['totalCount']}" style="text-align: right">0</td>
+            <td th:text="${data['dayCount']}" style="text-align: right">0</td>
+            <td th:text="${data['hourCount']}" style="text-align: right">0</td>
+        </tr>
+    </table>
+</div>
 </body>
 </html>

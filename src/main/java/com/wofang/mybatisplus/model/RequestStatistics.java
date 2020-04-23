@@ -177,4 +177,22 @@ public class RequestStatistics {
     public void setKeyword(String keyword) {
         this.keyword = keyword;
     }
+
+    /**
+     * 获取 统计数据源
+     *
+     * @return count 统计数据源
+     */
+    public int getCount() {
+        return this.count;
+    }
+
+    /**
+     * 设置 统计数据源
+     *
+     * @param count 统计数据源
+     */
+    public void setCount(int count) {
+        this.count = count;
+    }
 }
