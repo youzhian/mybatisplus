@@ -83,4 +83,47 @@ public class StatisticsController extends BaseController {
         mv.addObject("list",list);
         return mv;
     }
+
+    /**
+     * 根据传入的名称查询统计数据
+     * @return
+     */
+    @RequestMapping("statistics")
+    public ModelAndView statistics(String name) throws Exception {
+
+        ModelAndView mv = new ModelAndView("statistics/jfcc");
+        if(StringUtils.isBlank(name)){
+            return mv;
+        }
+        //当前时间
+        Date date = new Date();
+        //String name = "jfcc1.jk825.top";
+        QueryWrapper<RequestStatistics> query = new QueryWrapper<>();
+        query.eq("name",name);
+        //总数
+        long total = statisticsService.count(query);
+
+        String currDate = DateUtil.parseDate(date);
+
+        query.eq("create_date", currDate);
+        //查询当日数据量
+        long daytotal = statisticsService.count(query);
+        //精确到时
+        String milin = DateUtil.getStringDate(date,"yyyy-MM-dd HH");
+
+        query.lambda().ge(RequestStatistics::getCreateTime,milin);
+        //当前时间段数量
+        long hourtotal = statisticsService.count(query);
+        //总数
+        mv.addObject("total",total);
+        //日总数
+        mv.addObject("daytotal",daytotal);
+        //时间总数
+        mv.addObject("hourtotal",hourtotal);
+        mv.addObject("time",milin+":00:00~"+milin+":59:59");
+        //查询每个微信号的统计个数
+        List<JSONObject> list = statisticsService.getCountGroupByKeyword(name,currDate,milin);
+        mv.addObject("list",list);
+        return mv;
+    }
 }
