@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wofang.mybatisplus.model.UserInfo;
 import com.wofang.mybatisplus.service.UserInfoService;
 import com.wofang.mybatisplus.util.ResponseUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 
+@Api("indexController")
 @RestController
 public class IndexController {
 
@@ -23,7 +26,7 @@ public class IndexController {
     public ModelAndView none(){
         return index();
     }
-
+    @ApiOperation(value = "desc of method", notes = "")
     @RequestMapping("/")
     public ModelAndView index(){
         ModelAndView mv = new ModelAndView();

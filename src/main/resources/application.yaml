@@ -4,7 +4,7 @@ server:
     context-path: /
 spring:
   application:
-    name: naliwan-service
+    name: mybatis-plus
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/kingorder?useUnicode=true&characterEncoding=utf8
@@ -36,7 +36,6 @@ spring:
     cache: false
 logging:
   level:
-    com:
-      wofang:
-        mybatisplus:
-          mapper: debug
+    com: debug
+    org: debug
+    io: debug

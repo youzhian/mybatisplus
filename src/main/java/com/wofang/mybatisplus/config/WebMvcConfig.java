@@ -15,6 +15,11 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         //将所有/static/** 访问都映射到classpath:/static/ 目录下
 		//配置js，css等静态文件直接映射到对应的文件夹，不被拦截器处理
+		registry.addResourceHandler("swagger-ui.html").addResourceLocations(
+				"classpath:/META-INF/resources/");
+		registry.addResourceHandler("/webjars/**").addResourceLocations(
+				"classpath:/META-INF/resources/webjars/");
+		super.addResourceHandlers(registry);
         registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
     }
 
